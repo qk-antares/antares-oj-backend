@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.antares.member.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.antares.member.model.entity.User">
+            <id property="uid" column="uid" jdbcType="BIGINT"/>
+            <result property="username" column="username" jdbcType="VARCHAR"/>
+            <result property="password" column="password" jdbcType="VARCHAR"/>
+            <result property="userRole" column="user_role" jdbcType="VARCHAR"/>
+            <result property="accessKey" column="access_key" jdbcType="VARCHAR"/>
+            <result property="secretKey" column="secret_key" jdbcType="VARCHAR"/>
+            <result property="tags" column="tags" jdbcType="VARCHAR"/>
+            <result property="signature" column="signature" jdbcType="VARCHAR"/>
+            <result property="email" column="email" jdbcType="VARCHAR"/>
+            <result property="phone" column="phone" jdbcType="VARCHAR"/>
+            <result property="sex" column="sex" jdbcType="TINYINT"/>
+            <result property="avatar" column="avatar" jdbcType="VARCHAR"/>
+            <result property="follow" column="follow" jdbcType="INTEGER"/>
+            <result property="fans" column="fans" jdbcType="INTEGER"/>
+            <result property="topic" column="topic" jdbcType="INTEGER"/>
+            <result property="socialUid" column="social_uid" jdbcType="VARCHAR"/>
+            <result property="accessToken" column="access_token" jdbcType="VARCHAR"/>
+            <result property="expiresIn" column="expires_in" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        uid,username,password,user_role,access_key,secret_key,
+        tags,signature,email,
+        phone,sex,avatar,
+        social_uid,access_token,expires_in,
+        create_time,update_time,is_delete
+    </sql>
+
+    <select id="getRandomRecommend" resultType="com.antares.member.model.entity.User">
+        select uid,tags
+        from user as r1 join
+            (select FLOOR(RAND() * (select MAX(uid) from user)) as id) as r2
+        where r1.uid >= r2.id and
+              r1.uid != #{uid} and
+              r1.uid not in (select follow.follow_uid from follow where follow.uid = #{uid})
+        order by r1.uid LIMIT #{count};
+    </select>
+    <select id="getRandom" resultType="com.antares.member.model.entity.User">
+        select uid,tags
+        from user as r1 join
+                 (select FLOOR(RAND() * (select MAX(uid) from user)) as id) as r2
+        where r1.uid >= r2.id
+        order by r1.uid LIMIT #{count};
+    </select>
+</mapper>

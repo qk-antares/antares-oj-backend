@@ -1,0 +1,13 @@
+POST http://www.antares.cool/api/sandbox/execute
+Content-Type: application/json
+
+{
+  "inputList": [
+    "1 3",
+    "2 4"
+  ],
+  "code": "import java.io.*;\nimport java.util.*;\n\npublic class Main {\npublic static void main(String args[]) throws Exception {\nScanner cin = new Scanner(System.in);\nint a=cin.nextInt(), b=cin.nextInt();\nSystem.out.println(a+b);\n}\n}",
+  "language": "java"
+}
+
+###

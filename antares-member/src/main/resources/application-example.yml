@@ -1,0 +1,70 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url:
+    username: root
+    password:
+    hikari:
+      maximum-pool-size: 100
+      minimum-idle: 20
+  redis:
+    host:
+    port: 6379
+    password:
+  rabbitmq:
+    host:
+    port: 5672
+    password:
+    publisher-returns: true # 发送端，confirm Broker收到消息调用
+    publisher-confirm-type: correlated # 发送端，ReturnsCallback当队列没收到消息时调用
+    listener:
+      simple:
+        acknowledge-mode: manual # 手动ack
+  mail: # 邮件配置
+    host:  # 邮件服务器地址
+    username:  # 你的邮箱地址
+    password:  # 授权码
+    default-encoding: utf-8 # 编码格式
+    protocol: smtp # 协议
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true # 当数据库字段使用_连接时这里配置成true
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 配置日志
+  mapper-locations: classpath*:/mapper/**/*.xml # 配置xml文件位置，这里是和@mapperscan注解的作用是不同的，后者是指定dao的位置
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: isDelete # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+server:
+  port: 8123
+antares:
+  thread: # 线程池配置
+    coreSize: 20
+    maxSize: 200
+    keepAliveTime: 10
+  third-party:
+    sms:
+      apiUrl:
+      appId:
+      appSecret:
+      templateId:
+    oss:
+      accessKey:
+      secretKey:
+      bucket:
+      domain:
+    oauth:
+      gitee:
+        client_id:
+        client_secret:
+        grant_type:
+        redirect_uri:

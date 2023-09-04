@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: antares-member
+  profiles:
+    active: dev # 开发环境
+  cloud:
+    nacos:
+      server-addr:  # Nacos地址
+      username: nacos
+      password:

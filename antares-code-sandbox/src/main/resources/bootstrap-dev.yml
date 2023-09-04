@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        namespace: 706215d4-bfaf-436d-af24-b09fd85c10e5
+antares:
+  sandbox:
+    security-manager-path: E:\Workplace\antares-oj-backend\antares-code-sandbox\src\main\resources\security
+    security-manager-class-name: MySecurityManager

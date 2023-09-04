@@ -1,0 +1,27 @@
+server:
+  port: 88
+spring:
+  cloud:
+    gateway:
+      routes:
+        # 前端项目都带/api前缀
+        - id: member_route
+          uri: lb://antares-member
+          predicates:
+            - Path=/api/member/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+
+        - id: blog_route
+          uri: lb://antares-blog
+          predicates:
+            - Path=/api/blog/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+        - id: search_route
+          uri: lb://antares-search
+          predicates:
+            - Path=/api/search/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}

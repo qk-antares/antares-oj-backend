@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.antares.member.mapper.ConversationMapper">
+
+    <resultMap id="BaseResultMap" type="com.antares.member.model.entity.Conversation">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="fromUid" column="from_uid" jdbcType="BIGINT"/>
+            <result property="toUid" column="to_uid" jdbcType="BIGINT"/>
+            <result property="fromUnread" column="from_unread" jdbcType="INTEGER"/>
+            <result property="toUnread" column="to_unread" jdbcType="INTEGER"/>
+            <result property="lastMessage" column="last_message" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,from_uid,to_uid,
+        from_unread,to_unread,last_message,create_time,
+        update_time,is_delete
+    </sql>
+</mapper>

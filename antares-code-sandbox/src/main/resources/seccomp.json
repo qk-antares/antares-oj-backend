@@ -1,0 +1,29 @@
+{
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "syscalls": [
+    {
+      "name": "read",
+      "action": "SCMP_ACT_ALLOW",
+      "args": [
+        {
+          "index": 0,
+          "type": "fd",
+          "op": "SCMP_CMP_EQ",
+          "data": 0
+        }
+      ]
+    },
+    {
+      "name": "write",
+      "action": "SCMP_ACT_ALLOW",
+      "args": [
+        {
+          "index": 0,
+          "type": "fd",
+          "op": "SCMP_CMP_EQ",
+          "data": 1
+        }
+      ]
+    }
+  ]
+}
