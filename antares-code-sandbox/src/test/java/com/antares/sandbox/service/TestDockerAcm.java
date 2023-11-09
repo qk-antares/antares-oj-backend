@@ -4,17 +4,13 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.antares.sandbox.model.dto.ExecuteResult;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
-import org.springframework.util.StopWatch;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -28,7 +24,7 @@ public class TestDockerAcm {
 
         DefaultDockerClientConfig dockerClientConfig = DefaultDockerClientConfig
                 .createDefaultConfigBuilder()
-                .withDockerHost("tcp://debian.antares.cool:2375")
+                .withDockerHost("tcp://debian.zqk.asia:2375")
                 .build();
         DockerClient dockerClient = DockerClientBuilder.getInstance(dockerClientConfig).build();
 
@@ -45,7 +41,7 @@ public class TestDockerAcm {
         hostConfig.withMemory(128 * 1024 * 1024L);
         hostConfig.withMemorySwap(0L);
         hostConfig.withCpuCount(1L);
-        hostConfig.setBinds(new Bind("/www/wwwroot/oj.antares.cool-backend/tmpCode", new Volume("/app")));
+        hostConfig.setBinds(new Bind("/www/wwwroot/oj.zqk.asia-backend/tmpCode", new Volume("/app")));
         CreateContainerResponse createContainerResponse = containerCmd
                 .withHostConfig(hostConfig)
                 .withNetworkDisabled(true)

@@ -117,9 +117,9 @@ public abstract class JavaSandboxTemplate {
      */
     protected ExecuteResult compile(File codeFile) throws IOException {
         // Linux下的命令
-        String compileCmd = String.format("/software/jdk1.8.0_301/bin/javac -encoding utf-8 %s", codeFile.getAbsolutePath());
+        String compileCmd = String.format("/software/jdk1.8.0_361/bin/javac -encoding utf-8 %s", codeFile.getAbsolutePath());
         // Windows下的命令
-        // String compileCmd = String.format("javac -encoding utf-8 %s", codeFile.getAbsolutePath());
+//         String compileCmd = String.format("javac -encoding utf-8 %s", codeFile.getAbsolutePath());
 
         //创建并执行process
         log.info("执行命令：{}", compileCmd);

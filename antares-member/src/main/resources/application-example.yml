@@ -14,6 +14,7 @@ spring:
   rabbitmq:
     host:
     port: 5672
+    username:
     password:
     publisher-returns: true # 发送端，confirm Broker收到消息调用
     publisher-confirm-type: correlated # 发送端，ReturnsCallback当队列没收到消息时调用
@@ -47,6 +48,7 @@ mybatis-plus:
 server:
   port: 8123
 antares:
+  domain: antares.cool # cookie的作用域设置（实现同domain下的单点登录），本地运行请设置为localhost
   thread: # 线程池配置
     coreSize: 20
     maxSize: 200

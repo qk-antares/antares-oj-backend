@@ -1,5 +1,7 @@
-POST http://www.antares.cool/api/sandbox/execute
+POST http://oj.zqk.asia/api/sandbox/execute
 Content-Type: application/json
+accessKey: dd7431b1a7a83629c6fbef1924a99ea01d7114ca
+sign: sign
 
 {
   "inputList": [

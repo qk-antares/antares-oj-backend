@@ -26,7 +26,7 @@ public class TestDockerArgs {
 
         DefaultDockerClientConfig dockerClientConfig = DefaultDockerClientConfig
                 .createDefaultConfigBuilder()
-                .withDockerHost("tcp://debian.antares.cool:2375")
+                .withDockerHost("tcp://debian.zqk.asia:2375")
                 .build();
         DockerClient dockerClient = DockerClientBuilder.getInstance(dockerClientConfig).build();
 

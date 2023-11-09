@@ -17,7 +17,7 @@ public class JavaNativeArgsSandbox extends JavaSandboxTemplate {
         List<ExecuteResult> messages = new ArrayList<>();
         for (String input : inputList) {
             //Linux下的命令
-            String runCmd = String.format("/software/jdk1.8.0_301/bin/java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", dir, input);
+            String runCmd = String.format("/software/jdk1.8.0_361/bin/java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", dir, input);
             //Windows下命令
             // String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", dir, input);
             Process runProcess = Runtime.getRuntime().exec(runCmd);

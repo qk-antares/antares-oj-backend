@@ -1,5 +1,5 @@
 server:
-  port: 88
+  port: 8899
 spring:
   cloud:
     gateway:
@@ -23,5 +23,19 @@ spring:
           uri: lb://antares-search
           predicates:
             - Path=/api/search/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+        - id: oj_route
+          uri: lb://antares-oj
+          predicates:
+            - Path=/api/oj/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
+        - id: sandbox_route
+          uri: lb://antares-code-sandbox
+          predicates:
+            - Path=/api/sandbox/**
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}

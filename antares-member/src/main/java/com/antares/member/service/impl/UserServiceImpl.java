@@ -140,14 +140,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String encode = bCryptPasswordEncoder.encode(userRegisterRequest.getPassword());
             user.setPassword(encode);
 
-            //设置AK/SK
-            user.setAccessKey(DigestUtil.sha1Hex(RandomUtil.randomString(32)));
-            user.setSecretKey(DigestUtil.sha1Hex(RandomUtil.randomString(32)));
-
             //保存数据
             baseMapper.insert(user);
-            user.setUsername(USERNAME_PREFIX + user.getUid());
-            baseMapper.updateById(user);
+
+            //设置用户名和AK/SK
+            User update = new User();
+            update.setUid(user.getUid());
+            update.setUsername(USERNAME_PREFIX + user.getUid());
+            update.setAccessKey(DigestUtil.sha1Hex(user.getUid() + RandomUtil.randomString(32)));
+            update.setSecretKey(DigestUtil.sha1Hex(user.getUid() + RandomUtil.randomString(32)));
+            baseMapper.updateById(update);
         }
         throw new BusinessException(AppHttpCodeEnum.WRONG_CODE);
     }

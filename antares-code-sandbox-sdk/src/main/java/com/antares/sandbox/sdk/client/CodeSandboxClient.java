@@ -18,7 +18,7 @@ import static com.antares.sandbox.sdk.utils.SignUtils.genSign;
 @AllArgsConstructor
 @Slf4j
 public class CodeSandboxClient {
-    public static final String GATEWAY_HOST = "http://oj.antares.cool";
+    public static final String GATEWAY_HOST = "http://oj.zqk.asia";
     private String accessKey;
     private String secretKey;
 

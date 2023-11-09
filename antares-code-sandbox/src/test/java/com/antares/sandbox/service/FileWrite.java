@@ -6,6 +6,6 @@ import java.nio.file.Paths;
 
 public class FileWrite {
     public static void main(String[] args) throws IOException {
-        Files.createDirectories(Paths.get("/www/wwwroot/oj.antares.cool-backend/tmpCode/123"));
+        Files.createDirectories(Paths.get("/www/wwwroot/oj.zqk.asia-backend/tmpCode/123"));
     }
 }
