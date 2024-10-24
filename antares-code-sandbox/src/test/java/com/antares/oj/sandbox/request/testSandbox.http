@@ -1,0 +1,8 @@
+POST http://127.0.0.1:8132/sandbox/execute
+Content-Type: application/json
+
+{
+  "inputList": ["1 2", "2 3"],
+  "code": "import java.util.Scanner;public class Main {public static void main(String args[]) throws Exception {try (Scanner cin = new Scanner(System.in)) {int a = cin.nextInt(), b = cin.nextInt();System.out.println(a + b);}}}",
+  "language": "java"
+}
