@@ -21,7 +21,6 @@ public enum ProblemDifficultyEnum {
 
     /**
      * 获取值列表
-     *
      * @return
      */
     public static List<String> getValues() {
@@ -30,7 +29,6 @@ public enum ProblemDifficultyEnum {
 
     /**
      * 根据 value 获取枚举
-     *
      * @param value
      * @return
      */

@@ -7,7 +7,6 @@ import lombok.Data;
  */
 @Data
 public class JudgeCase {
-
     /**
      * 输入用例
      */

@@ -5,7 +5,6 @@ import com.antares.common.model.dto.problemsubmit.ProblemSubmitQueryRequest;
 import com.antares.common.model.entity.ProblemSubmit;
 import com.antares.common.model.vo.problemsubmit.ProblemSubmitVo;
 import com.antares.common.model.vo.problemsubmit.SubmitSummaryVo;
-import com.antares.common.model.vo.user.UserVo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -16,9 +15,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface ProblemSubmitService extends IService<ProblemSubmit> {
 
-    ProblemSubmit doProblemSubmit(ProblemSubmitAddRequest problemSubmitAddRequest, UserVo currentUser);
+    ProblemSubmit doProblemSubmit(ProblemSubmitAddRequest problemSubmitAddRequest, String token);
 
     Page<ProblemSubmitVo> listProblemSubmitVoByPage(ProblemSubmitQueryRequest problemSubmitQueryRequest, Long uid);
 
-    SubmitSummaryVo getSubmitSummary();
+    SubmitSummaryVo getSubmitSummary(String token);
 }

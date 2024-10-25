@@ -5,16 +5,16 @@
 <mapper namespace="com.antares.common.mapper.ProblemSubmitMapper">
 
     <resultMap id="BaseResultMap" type="com.antares.common.model.entity.ProblemSubmit">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="language" column="language" jdbcType="VARCHAR"/>
-            <result property="code" column="code" jdbcType="VARCHAR"/>
-            <result property="judgeInfo" column="judge_info" jdbcType="VARCHAR"/>
-            <result property="status" column="status" jdbcType="INTEGER"/>
-            <result property="problemId" column="problem_id" jdbcType="BIGINT"/>
-            <result property="userId" column="user_id" jdbcType="BIGINT"/>
-            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
-            <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="language" column="language" jdbcType="VARCHAR"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="judgeInfo" column="judge_info" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="problemId" column="problem_id" jdbcType="BIGINT"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -23,4 +23,16 @@
         user_id,create_time,update_time,
         is_delete
     </sql>
+
+    <select id="getPassCount" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT problem_id)
+        FROM problem_submit
+        WHERE user_id = #{userId} AND status = 3
+        <if test="ids != null and ids.size() > 0">
+            AND problem_id IN
+            <foreach collection="ids" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </select>
 </mapper>

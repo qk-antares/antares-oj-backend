@@ -16,6 +16,5 @@ public class JwtTest {
 
         // 1234567890
         System.out.println(jwt.getPayload("uid"));
-
     }
 }

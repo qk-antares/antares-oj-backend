@@ -14,7 +14,6 @@ import lombok.Getter;
  */
 @Getter
 public enum ProblemSubmitStatusEnum {
-
     // 0 - 等待中、1 - 判题中、2 - 解答错误、3 - 通过
     WAITING("等待中", 0),
     RUNNING("判题中", 1),
@@ -31,7 +30,6 @@ public enum ProblemSubmitStatusEnum {
 
     /**
      * 获取值列表
-     *
      * @return
      */
     public static List<Integer> getValues() {
@@ -40,7 +38,6 @@ public enum ProblemSubmitStatusEnum {
 
     /**
      * 根据 value 获取枚举
-     *
      * @param value
      * @return
      */

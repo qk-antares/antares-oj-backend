@@ -25,7 +25,7 @@ import cn.hutool.jwt.JWTException;
 @Aspect
 @Order(1)
 public class TokenAspect {
-    @Value("${antares.secret-key}")
+    @Value("${antares.user.secret-key}")
     private String secretKey;
     @Resource
     private StringRedisTemplate stringRedisTemplate;

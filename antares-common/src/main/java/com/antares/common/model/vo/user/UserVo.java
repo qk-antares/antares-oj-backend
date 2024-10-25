@@ -15,8 +15,6 @@ public class UserVo implements Serializable {
     private String username;
     private String email;
     private String userRole;
-    private String accessKey;
-    private String secretKey;
     private List<String> tags;
     private String signature;
     private Integer sex;

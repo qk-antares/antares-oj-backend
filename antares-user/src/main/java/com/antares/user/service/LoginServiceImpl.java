@@ -39,9 +39,9 @@ public class LoginServiceImpl extends ServiceImpl<UserMapper, User> implements L
     private Snowflake snowflake;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
-    @Value("${antares.secret-key}")
+    @Value("${antares.user.secret-key}")
     private String secretKey;
-    @Value("${antares.token-expire-hours}")
+    @Value("${antares.user.token-expire-hours}")
     private Integer tokenExpireHours;
 
     @Override

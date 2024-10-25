@@ -34,7 +34,7 @@ public class RoleAspect {
      * @param roleCheck
      * @return
      */
-    @Before("@annotation(com.antares.common.annotation.RoleCheck)")
+    @Before("@annotation(roleCheck)")
     public void doBefore(RoleCheck roleCheck) throws Throwable {
         // 获取当前请求的 HTTP 请求信息
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();

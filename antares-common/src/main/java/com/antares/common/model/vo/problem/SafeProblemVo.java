@@ -12,11 +12,13 @@ import com.antares.common.model.enums.judge.ProblemSubmitStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
 
 /**
  * 题目封装类
+ * 
  * @TableName question
  */
 @Data
@@ -93,32 +95,34 @@ public class SafeProblemVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-
     public static SafeProblemVo objToVo(Problem problem, Long uid, ProblemSubmitMapper problemSubmitMapper) {
         if (problem == null) {
             return null;
         }
         SafeProblemVo safeProblemVO = new SafeProblemVo();
-        BeanUtil.copyProperties(problem, safeProblemVO);
+
+        CopyOptions options = CopyOptions.create().setIgnoreProperties("tags", "judgeConfig");
+        BeanUtil.copyProperties(problem, safeProblemVO, options);
         safeProblemVO.setTags(JSONUtil.toList(problem.getTags(), String.class));
         safeProblemVO.setJudgeConfig(JSONUtil.toBean(problem.getJudgeConfig(), JudgeConfig.class));
 
-        //查询当前用户历史做题信息（已通过、尝试过、未开始）
-        ProblemSubmit submit = problemSubmitMapper.selectOne(new QueryWrapper<ProblemSubmit>()
-                .select("max(status) as status").lambda()
-                .eq(ProblemSubmit::getProblemId, problem.getId())
-                .eq(ProblemSubmit::getUserId, uid));
+        if (uid != null) {
+            // 查询当前用户历史做题信息（已通过、尝试过、未开始）
+            ProblemSubmit submit = problemSubmitMapper.selectOne(new QueryWrapper<ProblemSubmit>()
+                    .select("max(status) as status").lambda()
+                    .eq(ProblemSubmit::getUserId, uid)
+                    .eq(ProblemSubmit::getProblemId, problem.getId()));
 
-        if(submit == null){
-            safeProblemVO.setStatus("未开始");
-        } else if(submit.getStatus().equals(ProblemSubmitStatusEnum.SUCCEED.getValue())) {
-            safeProblemVO.setStatus("已通过");
-        } else if(submit.getStatus().equals(ProblemSubmitStatusEnum.FAILED.getValue())){
-            safeProblemVO.setStatus("尝试过");
-        } else {
-            safeProblemVO.setStatus("未开始");
+            if (submit == null) {
+                safeProblemVO.setStatus("未开始");
+            } else if (submit.getStatus().equals(ProblemSubmitStatusEnum.SUCCEED.getValue())) {
+                safeProblemVO.setStatus("已通过");
+            } else if (submit.getStatus().equals(ProblemSubmitStatusEnum.FAILED.getValue())) {
+                safeProblemVO.setStatus("尝试过");
+            } else {
+                safeProblemVO.setStatus("未开始");
+            }
         }
-
         return safeProblemVO;
     }
 }
