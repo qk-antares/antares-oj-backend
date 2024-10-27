@@ -10,7 +10,7 @@ import lombok.Getter;
 /**
  * @author Antares
  * @date 2023/8/24 17:10
- * @description 题目提交枚举
+ * @description 题目提交枚举: 0 - 等待中、1 - 判题中、2 - 解答错误、3 - 通过
  */
 @Getter
 public enum ProblemSubmitStatusEnum {

@@ -62,15 +62,13 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
         // 判断用户是否有正在等待或判题的题，如果有，提交判题失败
         Long userId = TokenUtils.getUidFromToken(token);
         ProblemSubmit submit = lambdaQuery().eq(ProblemSubmit::getUserId, userId)
-                .and(wrapper -> wrapper.eq(ProblemSubmit::getStatus, ProblemSubmitStatusEnum.WAITING.getValue()).or()
-                        .eq(ProblemSubmit::getStatus, ProblemSubmitStatusEnum.RUNNING.getValue()))
-                .one();
+                .lt(ProblemSubmit::getStatus, ProblemSubmitStatusEnum.SUCCEED.getValue()).one();
         if (submit != null) {
             throw new BusinessException(HttpCodeEnum.SUBMIT_ERROR, "提交过于频繁！");
         }
 
         // 将problem的提交数+1
-        problemMapper.update(null, new UpdateWrapper<Problem>()
+        problemMapper.update(new UpdateWrapper<Problem>()
                 .setSql("submit_num = submit_num + 1").eq("id", problem.getId()));
 
         // 插入problemSubmit
