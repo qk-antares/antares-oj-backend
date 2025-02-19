@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,17 +21,17 @@ import com.antares.common.annotation.RoleCheck;
 import com.antares.common.annotation.TokenCheck;
 import com.antares.common.constant.UserConstant;
 import com.antares.common.mapper.ProblemSubmitMapper;
-import com.antares.common.model.dto.problem.ProblemAddRequest;
-import com.antares.common.model.dto.problem.ProblemQueryRequest;
-import com.antares.common.model.dto.problem.ProblemUpdateRequest;
+import com.antares.common.model.dto.R;
+import com.antares.common.model.dto.problem.ProblemAddReq;
+import com.antares.common.model.dto.problem.ProblemQueryReq;
+import com.antares.common.model.dto.problem.ProblemUpdateReq;
 import com.antares.common.model.entity.Problem;
 import com.antares.common.model.enums.HttpCodeEnum;
 import com.antares.common.model.vo.problem.ProblemVo;
 import com.antares.common.model.vo.problem.SafeProblemVo;
-import com.antares.common.service.judge.ProblemService;
-import com.antares.common.utils.R;
 import com.antares.common.utils.ThrowUtils;
 import com.antares.common.utils.TokenUtils;
+import com.antares.judge.service.ProblemService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import lombok.extern.slf4j.Slf4j;
@@ -56,43 +55,43 @@ public class ProblemController {
     /**
      * 创建
      * 
-     * @param problemAddRequest
+     * @param problemAddReq
      * @return
      */
     @PostMapping
     @TokenCheck
     @RoleCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public R<Long> addProblem(@RequestBody @NotNull @Valid ProblemAddRequest problemAddRequest,
-            @RequestHeader("Authorization") String token) {
-        Long id = problemService.addProblem(problemAddRequest, token);
+    public R<Long> addProblem(@RequestBody @NotNull @Valid ProblemAddReq problemAddReq) {
+        String token = TokenUtils.getToken();
+        Long id = problemService.addProblem(problemAddReq, token);
         return R.ok(id);
     }
 
     /**
      * 分页获取题目列表（仅管理员）
      * 
-     * @param problemQueryRequest
+     * @param problemQueryReq
      * @return
      */
     @PostMapping("/page/vo")
     @TokenCheck
     @RoleCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public R<Page<ProblemVo>> listProblemVoByPage(@RequestBody @NotNull ProblemQueryRequest problemQueryRequest) {
-        Page<ProblemVo> page = problemService.listProblemVoByPage(problemQueryRequest);
+    public R<Page<ProblemVo>> listProblemVoByPage(@RequestBody @NotNull ProblemQueryReq problemQueryReq) {
+        Page<ProblemVo> page = problemService.listProblemVoByPage(problemQueryReq);
         return R.ok(page);
     }
 
     /**
      * 更新（仅管理员）
      * 
-     * @param problemUpdateRequest
+     * @param problemUpdateReq
      * @return
      */
     @PutMapping
     @TokenCheck
     @RoleCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public R<Void> updateProblem(@RequestBody @NotNull @Valid ProblemUpdateRequest problemUpdateRequest) {
-        problemService.updateProblem(problemUpdateRequest);
+    public R<Void> updateProblem(@RequestBody @NotNull @Valid ProblemUpdateReq problemUpdateReq) {
+        problemService.updateProblem(problemUpdateReq);
         return R.ok();
     }
 
@@ -150,10 +149,10 @@ public class ProblemController {
      * @return
      */
     @GetMapping("/{id}/vo/safe")
-    public R<SafeProblemVo> getSafeProblemVoById(@PathVariable("id") @Min(1) Long id,
-            @RequestHeader(value = "Authorization", required = false) String token) {
+    public R<SafeProblemVo> getSafeProblemVoById(@PathVariable("id") @Min(1) Long id) {
         Problem problem = problemService.getById(id);
         ThrowUtils.throwIf(problem == null, HttpCodeEnum.NOT_EXIST, "题目不存在");
+        String token = TokenUtils.getToken();
         Long uid = TokenUtils.getUidFromToken(token);
         SafeProblemVo vo = SafeProblemVo.objToVo(problem, uid, problemSubmitMapper);
         return R.ok(vo);
@@ -162,13 +161,13 @@ public class ProblemController {
     /**
      * 分页获取列表（脱敏）
      * 
-     * @param problemQueryRequest
+     * @param problemQueryReq
      * @return
      */
     @PostMapping("/page/vo/safe")
-    public R<Page<SafeProblemVo>> listSafeProblemVoByPage(@RequestBody ProblemQueryRequest problemQueryRequest,
-            @RequestHeader(value = "Authorization", required = false) String token) {
-        Page<SafeProblemVo> page = problemService.listSafeProblemVoByPage(problemQueryRequest, token);
+    public R<Page<SafeProblemVo>> listSafeProblemVoByPage(@RequestBody ProblemQueryReq problemQueryReq) {
+        String token = TokenUtils.getToken();
+        Page<SafeProblemVo> page = problemService.listSafeProblemVoByPage(problemQueryReq, token);
         return R.ok(page);
     }
 }

@@ -4,7 +4,8 @@ import javax.annotation.Resource;
 
 import org.springframework.stereotype.Component;
 
-import com.antares.judge.codesandbox.impl.ExampleCodeSandbox;
+import com.antares.common.exception.BusinessException;
+import com.antares.common.model.enums.HttpCodeEnum;
 import com.antares.judge.codesandbox.impl.RemoteCodeSandbox;
 import com.antares.judge.codesandbox.impl.ThirdPartyCodeSandbox;
 
@@ -19,24 +20,21 @@ public class CodeSandboxFactory {
     private RemoteCodeSandbox remoteCodeSandbox;
     @Resource
     private ThirdPartyCodeSandbox thirdPartyCodeSandbox;
-    @Resource
-    private ExampleCodeSandbox exampleCodeSandbox;
 
     /**
      * 创建代码沙箱示例
      *
-     * @param type 沙箱类型
+     * @param apiProvider 沙箱类型
      * @return
      */
-    public CodeSandbox newInstance(String type) {
-        switch (type) {
+    public CodeSandbox newInstance(String apiProvider) {
+        switch (apiProvider) {
             case "remote":
                 return remoteCodeSandbox;
             case "thirdParty":
                 return thirdPartyCodeSandbox;
-            case "example":
             default:
-                return exampleCodeSandbox;
+                throw new BusinessException(HttpCodeEnum.INTERNAL_SERVER_ERROR, "不支持的代码沙箱接口：" + apiProvider);
         }
     }
 }

@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.antares.codesandbox.model.dto.ExecuteCodeRequest;
-import com.antares.codesandbox.model.dto.ExecuteCodeResponse;
+import com.antares.codesandbox.model.dto.ExecuteCodeReq;
+import com.antares.codesandbox.model.dto.ExecuteCodeRes;
 import com.antares.codesandbox.service.SandboxService;
 
 import lombok.extern.slf4j.Slf4j;
 
 
 @RestController
-@RequestMapping("/sandbox")
+@RequestMapping
 @Slf4j
 @Validated
 public class SandboxController {
@@ -25,7 +25,7 @@ public class SandboxController {
     private SandboxService sandboxService;
 
     @PostMapping("/execute")
-    public ExecuteCodeResponse execute(@RequestBody ExecuteCodeRequest executeCodeRequest){
+    public ExecuteCodeRes execute(@RequestBody ExecuteCodeReq executeCodeRequest){
         return sandboxService.execute(executeCodeRequest);
     }
 }

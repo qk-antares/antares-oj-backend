@@ -3,8 +3,10 @@ package com.antares.common.model.vo.problem;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.antares.common.mapper.ProblemSubmitMapper;
+import com.antares.common.model.dto.problem.JudgeCase;
 import com.antares.common.model.dto.problem.JudgeConfig;
 import com.antares.common.model.entity.Problem;
 import com.antares.common.model.entity.ProblemSubmit;
@@ -69,6 +71,11 @@ public class SafeProblemVo implements Serializable {
     private Integer acceptedNum;
 
     /**
+     * 测试用例（json 对象）
+     */
+    private List<String> judgeCase;
+
+    /**
      * 判题配置（json 对象）
      */
     private JudgeConfig judgeConfig;
@@ -105,6 +112,10 @@ public class SafeProblemVo implements Serializable {
         BeanUtil.copyProperties(problem, safeProblemVO, options);
         safeProblemVO.setTags(JSONUtil.toList(problem.getTags(), String.class));
         safeProblemVO.setJudgeConfig(JSONUtil.toBean(problem.getJudgeConfig(), JudgeConfig.class));
+
+        List<String> judgeCase = JSONUtil.toList(problem.getJudgeCase(), JudgeCase.class)
+                        .stream().map(JudgeCase::getInput).collect(Collectors.toList());
+        safeProblemVO.setJudgeCase(judgeCase.subList(0, Math.min(3, judgeCase.size())));
 
         if (uid != null) {
             // 查询当前用户历史做题信息（已通过、尝试过、未开始）

@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import cn.hutool.core.util.ObjectUtil;
 import lombok.Getter;
 
 @Getter
@@ -13,12 +12,12 @@ public enum ExecuteCodeStatusEnum {
     COMPILE_FAILED("编译失败", 1),
     SUCCESS("成功", 0);
 
-    private final String text;
+    private final String msg;
 
     private final Integer value;
 
-    ExecuteCodeStatusEnum(String text, Integer value) {
-        this.text = text;
+    ExecuteCodeStatusEnum(String msg, Integer value) {
+        this.msg = msg;
         this.value = value;
     }
 
@@ -38,7 +37,7 @@ public enum ExecuteCodeStatusEnum {
      * @return
      */
     public static ExecuteCodeStatusEnum getEnumByValue(Integer value) {
-        if (ObjectUtil.isEmpty(value)) {
+        if (value == null) {
             return null;
         }
         for (ExecuteCodeStatusEnum anEnum : ExecuteCodeStatusEnum.values()) {

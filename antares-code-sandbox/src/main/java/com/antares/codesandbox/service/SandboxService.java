@@ -1,8 +1,8 @@
 package com.antares.codesandbox.service;
 
-import com.antares.codesandbox.model.dto.ExecuteCodeRequest;
-import com.antares.codesandbox.model.dto.ExecuteCodeResponse;
+import com.antares.codesandbox.model.dto.ExecuteCodeReq;
+import com.antares.codesandbox.model.dto.ExecuteCodeRes;
 
 public interface SandboxService {
-    ExecuteCodeResponse execute(ExecuteCodeRequest executeCodeRequest);
+    ExecuteCodeRes execute(ExecuteCodeReq executeCodeRequest);
 }

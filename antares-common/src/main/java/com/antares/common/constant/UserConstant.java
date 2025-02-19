@@ -20,4 +20,6 @@ public interface UserConstant {
      * 被封号
      */
     String BAN_ROLE = "ban";
+
+    String TOKEN = "token";
 }

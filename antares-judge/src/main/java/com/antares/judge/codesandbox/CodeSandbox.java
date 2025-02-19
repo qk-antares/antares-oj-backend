@@ -1,7 +1,7 @@
 package com.antares.judge.codesandbox;
 
-import com.antares.codesandbox.sdk.model.dto.executecode.ExecuteCodeRequest;
-import com.antares.codesandbox.sdk.model.dto.executecode.ExecuteCodeResponse;
+import com.antares.codesandbox.sdk.model.dto.ExecuteCodeReq;
+import com.antares.codesandbox.sdk.model.dto.ExecuteCodeRes;
 
 /**
  * @author Antares
@@ -17,5 +17,5 @@ public interface CodeSandbox {
      * @param secretKey
      * @return
      */
-    ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest, String accessKey, String secretKey);
+    ExecuteCodeRes executeCode(ExecuteCodeReq executeCodeRequest, String accessKey, String secretKey);
 }

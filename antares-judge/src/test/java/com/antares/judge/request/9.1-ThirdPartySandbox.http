@@ -1,0 +1,4 @@
+POST https://api.json.cn/try_run?action=get_token
+Content-Type: application/x-www-form-urlencoded
+
+source_code=import+java.util.Scanner%3B%0D%0A%0D%0Apublic+class+Main+%7B%0D%0A++++public+static+void+main(String+args%5B%5D)+throws+Exception+%7B%0D%0A++++++++try+(Scanner+cin+%3D+new+Scanner(System.in))+%7B%0D%0A++++++++++++int+a+%3D+cin.nextInt()%2C+b+%3D+cin.nextInt()%3B%0D%0A++++++++++++System.out.println(a+%2B+b)%3B%0D%0A++++++++%7D%0D%0A++++%7D%0D%0A%7D&language_id=62&command_line_arguments=&stdin=1%202

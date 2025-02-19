@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.antares.common.model.dto.R;
 import com.antares.common.service.user.ThirdPartyService;
-import com.antares.common.utils.R;
 
 import lombok.extern.slf4j.Slf4j;
 

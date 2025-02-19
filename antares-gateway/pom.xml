@@ -19,6 +19,12 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- 服务注册与发现 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
         <!-- 网关相关 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

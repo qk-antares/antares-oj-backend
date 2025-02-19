@@ -4,35 +4,39 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
-import com.antares.codesandbox.model.dto.ExecuteCodeRequest;
-import com.antares.codesandbox.model.dto.ExecuteCodeResponse;
+import com.antares.codesandbox.factory.SandboxFactory;
+import com.antares.codesandbox.model.dto.ExecuteCodeReq;
+import com.antares.codesandbox.model.dto.ExecuteCodeRes;
 import com.antares.codesandbox.service.SandboxService;
-import com.antares.codesandbox.template.cpp.CppSandboxTemplate;
-import com.antares.codesandbox.template.java.JavaSandboxTemplate;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@RefreshScope
 public class SandboxServiceImpl implements SandboxService {
     @Resource
-    private JavaSandboxTemplate javaNativeAcmSandbox;
+    private SandboxFactory javaSandboxFactory;
     @Resource
-    private CppSandboxTemplate cppNativeAcmSandbox;
+    private SandboxFactory cppSandboxFactory;
+    @Value("${antares.code-sandbox.type:docker}")
+    private String sandboxType;
 
     @Override
-    public ExecuteCodeResponse execute(ExecuteCodeRequest executeCodeRequest) {
+    public ExecuteCodeRes execute(ExecuteCodeReq executeCodeRequest) {
         List<String> inputList = executeCodeRequest.getInputList();
         String code = executeCodeRequest.getCode();
         String language = executeCodeRequest.getLanguage();
 
-        switch (language){
+        switch (language) {
             case "java":
-                return javaNativeAcmSandbox.executeJavaCode(inputList, code);
+                return javaSandboxFactory.createSandboxTemplate(sandboxType).executeCode(inputList, code, ".java");
             case "cpp":
-                return cppNativeAcmSandbox.executeCppCode(inputList, code);
+                return cppSandboxFactory.createSandboxTemplate(sandboxType).executeCode(inputList, code, ".cpp");
             default:
                 return null;
         }

@@ -1,7 +1,7 @@
 package com.antares.codesandbox.sdk.client;
 
-import com.antares.codesandbox.sdk.model.dto.executecode.ExecuteCodeRequest;
-import com.antares.codesandbox.sdk.model.dto.executecode.ExecuteCodeResponse;
+import com.antares.codesandbox.sdk.model.dto.ExecuteCodeReq;
+import com.antares.codesandbox.sdk.model.dto.ExecuteCodeRes;
 import com.antares.codesandbox.sdk.utils.SignUtils;
 
 import cn.hutool.http.HttpRequest;
@@ -19,11 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 public class CodeSandboxClient {
-    public static final String GATEWAY_HOST = "http://oj.zqk.asia";
+    public static final String GATEWAY_HOST = "http://127.0.0.1:8024";
     private String accessKey;
     private String secretKey;
 
-    public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
+    public ExecuteCodeRes executeCode(ExecuteCodeReq executeCodeRequest) {
         String requestBodyJson = JSONUtil.toJsonStr(executeCodeRequest);
         try (HttpResponse response = HttpRequest.post(GATEWAY_HOST + "/api/sandbox/execute")
                 .header("Content-Type", "application/json")
@@ -33,7 +33,7 @@ public class CodeSandboxClient {
                 .execute()) {
             String responseBody = response.body();
             log.info("响应：{}", response);
-            return JSONUtil.toBean(responseBody, ExecuteCodeResponse.class);
+            return JSONUtil.toBean(responseBody, ExecuteCodeRes.class);
         } catch (Exception e) {
             log.info("请求沙箱失败：", e);
             return null;

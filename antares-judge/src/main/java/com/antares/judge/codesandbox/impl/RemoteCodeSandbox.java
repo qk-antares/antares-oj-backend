@@ -3,8 +3,8 @@ package com.antares.judge.codesandbox.impl;
 import org.springframework.stereotype.Service;
 
 import com.antares.codesandbox.sdk.client.CodeSandboxClient;
-import com.antares.codesandbox.sdk.model.dto.executecode.ExecuteCodeRequest;
-import com.antares.codesandbox.sdk.model.dto.executecode.ExecuteCodeResponse;
+import com.antares.codesandbox.sdk.model.dto.ExecuteCodeReq;
+import com.antares.codesandbox.sdk.model.dto.ExecuteCodeRes;
 import com.antares.judge.codesandbox.CodeSandbox;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RemoteCodeSandbox implements CodeSandbox {
 
     @Override
-    public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest, String accessKey, String secretKey) {
+    public ExecuteCodeRes executeCode(ExecuteCodeReq executeCodeRequest, String accessKey, String secretKey) {
         log.info("accessKey:{}, secretKey:{}", accessKey, secretKey);
         CodeSandboxClient client = new CodeSandboxClient(accessKey, secretKey);
         return client.executeCode(executeCodeRequest);

@@ -1,21 +1,20 @@
 package com.antares.codesandbox.template.cpp;
 
-import org.springframework.stereotype.Service;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
-@Service
-public class CppNativeAcmSandbox extends CppSandboxTemplate {
-    @Override
-    protected void step1() {
+import org.springframework.stereotype.Component;
 
-    }
+import com.antares.codesandbox.model.dto.ExecuteCodeRes;
+import com.antares.codesandbox.template.SandboxTemplate;
 
-    @Override
-    protected void step2() {
-
-    }
+@Component
+public class CppNativeAcmSandbox extends SandboxTemplate {
 
     @Override
-    protected void step3() {
-
+    protected ExecuteCodeRes compileAndRun(File codeFile, List<String> inputList) throws IOException {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'compileAndRun'");
     }
 }

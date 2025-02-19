@@ -1,0 +1,3 @@
+GET  http://127.0.0.1:8011/user/current 
+Content-Type: application/json
+Cookie: token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjE4NDg2NTMxNDk4MTI5NTMwODgsInVzZXJSb2xlIjoiYWRtaW4iLCJleHAiOjE3MzYyNDE3MjJ9.noQv3wKDkrdrewJpQDnB0rYJ0tqffwR7MmBjCoP9DJc

@@ -1,19 +1,15 @@
 package com.antares.common.aop;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.antares.common.annotation.RoleCheck;
 import com.antares.common.exception.BusinessException;
 import com.antares.common.model.enums.HttpCodeEnum;
 import com.antares.common.model.enums.user.UserRoleEnum;
+import com.antares.common.utils.TokenUtils;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.jwt.JWT;
@@ -36,13 +32,10 @@ public class RoleAspect {
      */
     @Before("@annotation(roleCheck)")
     public void doBefore(RoleCheck roleCheck) throws Throwable {
-        // 获取当前请求的 HTTP 请求信息
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = attributes.getRequest();
+        // 从Cookie中获取Token
+        String token = TokenUtils.getToken();
 
-        // 从请求头中获取 Token
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
-        JWT jwt = JWT.of(token.substring(7));
+        JWT jwt = JWT.of(token);
         String userRole = (String) jwt.getPayload("userRole");
         
         String mustRole = roleCheck.mustRole();

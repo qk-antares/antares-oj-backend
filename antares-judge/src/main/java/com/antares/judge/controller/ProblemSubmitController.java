@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.antares.common.annotation.TokenCheck;
+import com.antares.common.model.dto.R;
 import com.antares.common.model.dto.problemsubmit.ProblemSubmitAddRequest;
 import com.antares.common.model.dto.problemsubmit.ProblemSubmitQueryRequest;
 import com.antares.common.model.entity.ProblemSubmit;
 import com.antares.common.model.vo.problemsubmit.ProblemSubmitVo;
 import com.antares.common.model.vo.problemsubmit.SubmitSummaryVo;
-import com.antares.common.service.judge.ProblemSubmitService;
-import com.antares.common.utils.R;
+import com.antares.judge.service.ProblemSubmitService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import lombok.extern.slf4j.Slf4j;

@@ -1,0 +1,7 @@
+POST http://127.0.0.1:8013/sandbox/execute
+Content-Type: application/json
+
+{
+  "code": "import java.io.IOException;import java.nio.file.Files;import java.nio.file.Paths;import java.util.List;public class Main {public static void main(String[] args) throws IOException {String filePath = \"/etc/passwd\";List<String> allLines = Files.readAllLines(Paths.get(filePath));System.out.println(String.join(\"\\n\", allLines));}}",
+  "language": "java"
+}

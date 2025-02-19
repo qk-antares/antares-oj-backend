@@ -55,3 +55,10 @@ CREATE TABLE `problem_submit` (
   KEY `idx_userId_status` (`user_id`,`status`),
   KEY `idx_userId_problemId` (`user_id`,`problem_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='题目提交';
+
+# 以下为测试脚本
+
+# 重置三个表
+TRUNCATE TABLE `problem`;
+
+ALTER TABLE `problem` AUTO_INCREMENT = 1;

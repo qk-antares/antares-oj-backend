@@ -1,3 +1,0 @@
-GET  http://127.0.0.1:8011/member/current 
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjE4NDg2NTMxNDk4MTI5NTMwODgsInVzZXJSb2xlIjoidXNlciIsImV4cCI6MTczMDIwNjg4NH0.Zq70fpeVyJGUhBjQpdI5bBI0eauo5EpQCLrQxueInQc
-Content-Type: application/json

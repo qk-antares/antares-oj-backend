@@ -9,7 +9,7 @@ public enum HttpCodeEnum {
     //服务器内部异常
     INTERNAL_SERVER_ERROR(505, "未知的服务器内部异常"),
     //参数不合法
-    PARAMS_ERROR(401, "请求参数不合法"),
+    BAD_REQUEST(400, "请求参数不合法"),
     //无权限
     NO_AUTH(403, "没有执行操作的权限"),
     //请求的资源不存在
@@ -32,9 +32,7 @@ public enum HttpCodeEnum {
     ARTICLE_TAG_EXIST(11031, "该标签已存在"),
 
     //OJ相关
-    SUBMIT_ERROR(20001, "提交判题失败"),
-    //代码沙箱
-    DANGER_CODE(21001, "危险代码");
+    SUBMIT_ERROR(20001, "提交判题失败");
 
 
     public int code;

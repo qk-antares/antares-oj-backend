@@ -1,6 +1,10 @@
 package com.antares.codesandbox.constant;
 
+import java.util.List;
+
 public interface SandboxConstants {
-    public static final String JAVA_CLASS_NAME = "Main.java";
-    public static final long TIME_OUT = 5000000L;
+    String FILE_NAME = "Main";
+    long TIME_OUT = 5 * 1000L;
+    List<String> BANNED_WORDS = List.of("Files", "exec");
+    String JDK_IMAGE = "openjdk:8-alpine";
 }

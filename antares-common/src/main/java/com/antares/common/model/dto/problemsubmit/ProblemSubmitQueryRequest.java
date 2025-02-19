@@ -2,7 +2,7 @@ package com.antares.common.model.dto.problemsubmit;
 
 import java.io.Serializable;
 
-import com.antares.common.utils.PageRequest;
+import com.antares.common.model.dto.PageReq;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ProblemSubmitQueryRequest extends PageRequest implements Serializable {
+public class ProblemSubmitQueryRequest extends PageReq implements Serializable {
     /**
      * 题目 id
      */

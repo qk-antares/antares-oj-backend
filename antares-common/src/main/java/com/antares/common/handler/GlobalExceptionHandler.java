@@ -3,16 +3,16 @@ package com.antares.common.handler;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.antares.common.exception.BusinessException;
+import com.antares.common.model.dto.R;
 import com.antares.common.model.enums.HttpCodeEnum;
-import com.antares.common.utils.R;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,12 +31,24 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleValidationException(ConstraintViolationException e){
-        for(ConstraintViolation<?> s:e.getConstraintViolations()){
-            return s.getInvalidValue()+": "+s.getMessage();
+    public R<Void> handleValidationException(ConstraintViolationException e){
+        //打印异常信息
+        log.error("出现异常：[{}]，原因：[{}]", e.getClass().getName(), "请求参数不合法");
+        for(ConstraintViolation<?> s : e.getConstraintViolations()){
+            return R.error(HttpCodeEnum.BAD_REQUEST.getCode(), s.getInvalidValue()+": "+s.getMessage());
         }
-        return "请求参数不合法";
+        return R.error(HttpCodeEnum.BAD_REQUEST.getCode(), "请求参数不合法");
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    public R<Void> handleValidationException(MethodArgumentNotValidException e){
+        //打印异常信息
+        log.error("出现异常：[{}]，原因：[{}]", e.getClass().getName(), "请求参数不合法");
+        for(FieldError s : e.getBindingResult().getFieldErrors()){
+            return R.error(HttpCodeEnum.BAD_REQUEST.getCode(), s.getField()+": "+s.getDefaultMessage());
+        }
+        return R.error(HttpCodeEnum.BAD_REQUEST.getCode(), "请求参数不合法");
     }
 
     @ExceptionHandler(Exception.class)

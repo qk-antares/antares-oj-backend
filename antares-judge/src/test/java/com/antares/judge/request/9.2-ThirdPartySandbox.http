@@ -1,0 +1,2 @@
+GET https://api.json.cn/try_run?action=get_result&token=2895bc46-1a21-494a-a91c-6a283508ad38
+Content-Type: application/x-www-form-urlencoded
