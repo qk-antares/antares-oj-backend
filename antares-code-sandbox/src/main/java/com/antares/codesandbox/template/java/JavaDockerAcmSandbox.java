@@ -13,13 +13,14 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
-import com.antares.codesandbox.constant.SandboxConstants;
 import com.antares.codesandbox.model.dto.ExecuteCodeRes;
 import com.antares.codesandbox.model.dto.ExecuteResult;
 import com.antares.codesandbox.model.enums.ExecuteCodeStatusEnum;
+import com.antares.codesandbox.model.enums.ExitCodeEnum;
 import com.antares.codesandbox.template.SandboxTemplate;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
@@ -36,7 +37,9 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 
-@Component
+@Component("javaAcmSandbox")
+// 只在开启docker代码沙箱时加载
+@ConditionalOnProperty(name = "antares.code-sandbox.type", havingValue = "docker")
 @RefreshScope
 @Slf4j
 public class JavaDockerAcmSandbox extends SandboxTemplate {
@@ -48,8 +51,8 @@ public class JavaDockerAcmSandbox extends SandboxTemplate {
     private String savePath;
     @Value("${antares.code-sandbox.mem-script:/docker/code/java/antares-oj-backend/script/mem.sh}")
     private String memScript;
-    @Value("${antares.sandbox.java-xmx:128}")
-    private int JAVA_XMX;
+    @Value("${antares.code-sandbox.jdk-image:openjdk:8-alpine}")
+    private String jdkImage;
 
     @Resource
     private DockerClient dockerClient;
@@ -152,7 +155,7 @@ public class JavaDockerAcmSandbox extends SandboxTemplate {
                 });
 
                 ExecCreateCmdResponse runResponse = dockerClient.execCreateCmd(containerId)
-                        .withCmd("java", String.format("-Xmx%dm", JAVA_XMX), "-cp", "/app", "Main")
+                        .withCmd("java", String.format("-Xmx%dm", this.javaXmx), "-cp", "/app", "Main")
                         .withAttachStdin(true)
                         .withAttachStdout(true)
                         .withAttachStderr(true)
@@ -197,12 +200,11 @@ public class JavaDockerAcmSandbox extends SandboxTemplate {
                 // 超时控制
                 Thread thread = new Thread(() -> {
                     try {
-                        Thread.sleep(SandboxConstants.TIME_OUT);
+                        Thread.sleep(this.timeout);
                         // 超时了，直接停止callback
                         callback.close();
                     } catch (InterruptedException e) {
                         log.info("超时控制线程终止，代码在时间限制内运行完成");
-                        ;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -252,11 +254,12 @@ public class JavaDockerAcmSandbox extends SandboxTemplate {
                 executeResults.add(executeResult);
 
                 // 已经有用例失败了
-                if (executeResult.getExitCode() != 0) {
+                if (executeResult.getExitCode() != ExitCodeEnum.SUCCESS.getValue()) {
+                    ExecuteCodeStatusEnum statusEnum = ExecuteCodeStatusEnum
+                            .getEnumByExitCodeEnum(ExitCodeEnum.getEnumByValue(executeResult.getExitCode()));
                     return ExecuteCodeRes.builder()
-                            .code(ExecuteCodeStatusEnum.RUN_FAILED.getValue())
-                            .msg(ExecuteCodeStatusEnum.RUN_FAILED.getMsg())
-                            .results(executeResults)
+                            .code(statusEnum.getValue())
+                            .msg(statusEnum.getMsg())
                             .build();
                 }
             }
@@ -301,7 +304,7 @@ public class JavaDockerAcmSandbox extends SandboxTemplate {
                 new Bind(memScript, new Volume("/script/mem.sh")));
 
         CreateContainerResponse createContainerResponse = dockerClient
-                .createContainerCmd(SandboxConstants.JDK_IMAGE)
+                .createContainerCmd(this.jdkImage)
                 .withName(codeId)
                 .withHostConfig(hostConfig)
                 .withUser("nobody")

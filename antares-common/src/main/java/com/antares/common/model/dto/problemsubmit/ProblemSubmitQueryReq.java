@@ -12,7 +12,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ProblemSubmitQueryRequest extends PageReq implements Serializable {
+public class ProblemSubmitQueryReq extends PageReq implements Serializable {
     /**
      * 题目 id
      */

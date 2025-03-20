@@ -3,6 +3,7 @@ package com.antares.codesandbox.config;
 import java.time.Duration;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,8 @@ import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 
 @Configuration
+// 只在开启docker代码沙箱时加载
+@ConditionalOnProperty(name = "antares.code-sandbox.type", havingValue = "docker")
 @RefreshScope
 public class DockerClientConfig {
     @Value("${antares.code-sandbox.docker-host:tcp://172.17.0.1:2375}")

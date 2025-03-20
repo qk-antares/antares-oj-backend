@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.antares.codesandbox.constant.SandboxConstants;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerResponse;
@@ -37,6 +36,10 @@ public class TestJavaDockerAcmSandbox {
     private String savePath;
     @Value("${antares.code-sandbox.mem-script:/docker/code/java/antares-oj-backend/script/mem.sh}")
     private String memScript;
+    @Value("${antares.code-sandbox.jdk-image:openjdk:8-alpine}")
+    private String jdkImage;
+    @Value("${antares.code-sandbox.timeout:1000}")
+    private long timeout;
 
     @Resource
     private DockerClient dockerClient;
@@ -62,7 +65,7 @@ public class TestJavaDockerAcmSandbox {
         hostConfig.setBinds(new Bind(savePath, new Volume("/app")),
                 new Bind(memScript, new Volume("/script/mem.sh")));
 
-        CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd(SandboxConstants.JDK_IMAGE)
+        CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd(this.jdkImage)
                 .withName(UUID.randomUUID().toString())
                 .withHostConfig(hostConfig)
                 .withUser("nobody")
@@ -193,7 +196,7 @@ public class TestJavaDockerAcmSandbox {
             // 超时控制
             Thread thread = new Thread(() -> {
                 try {
-                    Thread.sleep(SandboxConstants.TIME_OUT);
+                    Thread.sleep(this.timeout);
                     // 超时了，直接停止callback
                     callback.close();
                 } catch (InterruptedException | IOException e) {
@@ -256,7 +259,7 @@ public class TestJavaDockerAcmSandbox {
         hostConfig.setBinds(new Bind(savePath, new Volume("/app")),
                 new Bind(memScript, new Volume("/script/mem.sh")));
 
-        CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd(SandboxConstants.JDK_IMAGE)
+        CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd(this.jdkImage)
                 .withName(UUID.randomUUID().toString())
                 .withHostConfig(hostConfig)
                 .withUser("nobody")
@@ -295,7 +298,7 @@ public class TestJavaDockerAcmSandbox {
                         new Bind(memScript, new Volume("/script/mem.sh")));
 
                 CreateContainerResponse createContainerResponse = dockerClient
-                        .createContainerCmd(SandboxConstants.JDK_IMAGE)
+                        .createContainerCmd(this.jdkImage)
                         .withName(UUID.randomUUID().toString())
                         .withHostConfig(hostConfig)
                         .withUser("nobody")

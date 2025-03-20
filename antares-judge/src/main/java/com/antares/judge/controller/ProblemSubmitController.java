@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.antares.common.annotation.TokenCheck;
 import com.antares.common.model.dto.R;
-import com.antares.common.model.dto.problemsubmit.ProblemSubmitAddRequest;
-import com.antares.common.model.dto.problemsubmit.ProblemSubmitQueryRequest;
+import com.antares.common.model.dto.problemsubmit.ProblemSubmitAddReq;
+import com.antares.common.model.dto.problemsubmit.ProblemSubmitQueryReq;
 import com.antares.common.model.entity.ProblemSubmit;
 import com.antares.common.model.vo.problemsubmit.ProblemSubmitVo;
 import com.antares.common.model.vo.problemsubmit.SubmitSummaryVo;
@@ -47,10 +47,9 @@ public class ProblemSubmitController {
      */
     @PostMapping
     @TokenCheck
-    public R<ProblemSubmit> doProblemSubmit(
-            @RequestBody @NotNull @Valid ProblemSubmitAddRequest problemSubmitAddRequest,
-            @RequestHeader("Authorization") String token) {
-        ProblemSubmit submitResult = problemSubmitService.doProblemSubmit(problemSubmitAddRequest, token);
+    public R<ProblemSubmitVo> doProblemSubmit(
+            @RequestBody @NotNull @Valid ProblemSubmitAddReq problemSubmitAddRequest) {
+        ProblemSubmit submitResult = problemSubmitService.doProblemSubmit(problemSubmitAddRequest);
         return R.ok(submitResult);
     }
 
@@ -63,7 +62,7 @@ public class ProblemSubmitController {
     @PostMapping("/page/vo")
     @TokenCheck
     public R<Page<ProblemSubmitVo>> listProblemSubmitVoByPage(
-            @RequestBody ProblemSubmitQueryRequest problemSubmitQueryRequest, HttpServletRequest request) {
+            @RequestBody ProblemSubmitQueryReq problemSubmitQueryRequest, HttpServletRequest request) {
         Page<ProblemSubmitVo> page = problemSubmitService.listProblemSubmitVoByPage(problemSubmitQueryRequest, null);
         // 返回脱敏信息
         return R.ok(page);

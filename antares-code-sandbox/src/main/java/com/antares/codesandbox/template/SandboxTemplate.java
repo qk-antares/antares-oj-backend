@@ -11,7 +11,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.antares.codesandbox.constant.SandboxConstants;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.stereotype.Component;
+
 import com.antares.codesandbox.model.dto.ExecuteCodeRes;
 import com.antares.codesandbox.model.enums.ExecuteCodeStatusEnum;
 import com.antares.common.exception.BusinessException;
@@ -23,12 +26,20 @@ import cn.hutool.dfa.WordTree;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Component
+@RefreshScope
 public abstract class SandboxTemplate {
-    public static final WordTree WORD_TREE;
+    private static final WordTree WORD_TREE;
+    @Value("${antares.sandbox.java-xmx:128}")
+    protected int javaXmx;
+    @Value("${antares.sandbox.timeout:1000}")
+    protected long timeout;
+    @Value("${antares.sandbox.filename:Main}")
+    protected String filename;
 
     static {
         WORD_TREE = new WordTree();
-        WORD_TREE.addWords(SandboxConstants.BANNED_WORDS);
+        WORD_TREE.addWords("Files", "exec");
     }
 
     /**
@@ -80,7 +91,7 @@ public abstract class SandboxTemplate {
             throw new BusinessException(HttpCodeEnum.BAD_REQUEST, "危险代码");
         }
 
-        String path = dir + File.separator + SandboxConstants.FILE_NAME + ext;
+        String path = dir + File.separator + this.filename + ext;
         log.info("代码保存目录：{}", dir);
         File codFile = FileUtil.writeUtf8String(code, path);
         

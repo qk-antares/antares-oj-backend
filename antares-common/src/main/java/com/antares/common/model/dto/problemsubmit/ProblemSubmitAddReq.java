@@ -10,7 +10,7 @@ import lombok.Data;
  * 创建请求
  */
 @Data
-public class ProblemSubmitAddRequest implements Serializable {
+public class ProblemSubmitAddReq implements Serializable {
 
     /**
      * 编程语言

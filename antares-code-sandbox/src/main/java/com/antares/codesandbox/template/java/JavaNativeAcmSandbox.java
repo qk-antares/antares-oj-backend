@@ -6,25 +6,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import com.antares.codesandbox.constant.SandboxConstants;
 import com.antares.codesandbox.model.dto.ExecuteCodeRes;
 import com.antares.codesandbox.model.dto.ExecuteResult;
 import com.antares.codesandbox.model.enums.ExecuteCodeStatusEnum;
+import com.antares.codesandbox.model.enums.ExitCodeEnum;
 import com.antares.codesandbox.template.SandboxTemplate;
 import com.antares.codesandbox.utils.ProcessUtils;
 
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 
-@Component
+@Component("javaAcmSandbox")
+// 只在开启native代码沙箱时加载
+@ConditionalOnProperty(name = "antares.code-sandbox.type", havingValue = "native")
 @Slf4j
 public class JavaNativeAcmSandbox extends SandboxTemplate {
-    @Value("${antares.sandbox.java-xmx:128}")
-    private int JAVA_XMX;
-
     @Override
     protected ExecuteCodeRes compileAndRun(File codeFile, List<String> inputList) throws IOException {
         // 1. 编译代码
@@ -38,7 +37,13 @@ public class JavaNativeAcmSandbox extends SandboxTemplate {
         if (compileResult.getExitCode() != 0) {
             return ExecuteCodeRes.builder()
                     .code(ExecuteCodeStatusEnum.COMPILE_FAILED.getValue())
-                    .msg(compileResult.getStderr())
+                    .msg(compileResult.getStderr().replaceAll(
+                            String.join(
+                                    File.separator,
+                                    System.getProperty("user.dir"),
+                                    "tmpCode",
+                                    "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"),
+                            ""))
                     .build();
         }
 
@@ -55,11 +60,12 @@ public class JavaNativeAcmSandbox extends SandboxTemplate {
             executeResults.add(executeResult);
 
             // 已经有用例失败了
-            if (executeResult.getExitCode() != 0) {
+            if (executeResult.getExitCode() != ExitCodeEnum.SUCCESS.getValue()) {
+                ExecuteCodeStatusEnum statusEnum = ExecuteCodeStatusEnum
+                        .getEnumByExitCodeEnum(ExitCodeEnum.getEnumByValue(executeResult.getExitCode()));
                 return ExecuteCodeRes.builder()
-                        .code(ExecuteCodeStatusEnum.RUN_FAILED.getValue())
-                        .msg(ExecuteCodeStatusEnum.RUN_FAILED.getMsg())
-                        .results(executeResults)
+                        .code(statusEnum.getValue())
+                        .msg(statusEnum.getMsg())
                         .build();
             }
         }
@@ -72,7 +78,7 @@ public class JavaNativeAcmSandbox extends SandboxTemplate {
     }
 
     public ExecuteResult runOneCase(File codeFile, String input) throws IOException {
-        String[] runCmd = { "java", String.format("-Xmx%dm", JAVA_XMX), "-Dfile.encoding=UTF-8",
+        String[] runCmd = { "java", String.format("-Xmx%dm", this.javaXmx), "-Dfile.encoding=UTF-8",
                 "-cp", codeFile.getParent(), "Main" };
 
         long start = System.currentTimeMillis();
@@ -81,7 +87,7 @@ public class JavaNativeAcmSandbox extends SandboxTemplate {
         // 超时控制
         Thread thread = new Thread(() -> {
             try {
-                Thread.sleep(SandboxConstants.TIME_OUT);
+                Thread.sleep(this.timeout);
                 // 超时了，直接杀死运行代码的进程
                 runProcess.destroy();
             } catch (InterruptedException e) {

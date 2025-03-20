@@ -11,8 +11,8 @@ import com.antares.common.exception.BusinessException;
 import com.antares.common.mapper.ProblemMapper;
 import com.antares.common.mapper.ProblemSubmitMapper;
 import com.antares.common.mapper.UserMapper;
-import com.antares.common.model.dto.problemsubmit.ProblemSubmitAddRequest;
-import com.antares.common.model.dto.problemsubmit.ProblemSubmitQueryRequest;
+import com.antares.common.model.dto.problemsubmit.ProblemSubmitAddReq;
+import com.antares.common.model.dto.problemsubmit.ProblemSubmitQueryReq;
 import com.antares.common.model.entity.Problem;
 import com.antares.common.model.entity.ProblemSubmit;
 import com.antares.common.model.entity.User;
@@ -47,31 +47,22 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
     @Resource
     private UserMapper userMapper;
 
+    // TODO 限流，防止用户频繁提交
     @Override
-    public ProblemSubmit doProblemSubmit(ProblemSubmitAddRequest problemSubmitAddRequest, String token) {
+    public ProblemSubmit doProblemSubmit(ProblemSubmitAddReq problemSubmitAddRequest) {
         // 校验编程语言是否合法
         String language = problemSubmitAddRequest.getLanguage();
         LanguageEnum languageEnum = LanguageEnum.getEnumByValue(language);
         ThrowUtils.throwIf(languageEnum == null, new BusinessException(HttpCodeEnum.BAD_REQUEST, "不支持的编程语言"));
 
         long problemId = problemSubmitAddRequest.getProblemId();
-        // 判断题目是否存在
-        Problem problem = problemMapper.selectById(problemId);
-        ThrowUtils.throwIf(problem == null, new BusinessException(HttpCodeEnum.NOT_EXIST, "题目不存在"));
-
-        // 判断用户是否有正在等待或判题的题，如果有，提交判题失败
-        Long userId = TokenUtils.getUidFromToken(token);
-        ProblemSubmit submit = lambdaQuery().eq(ProblemSubmit::getUserId, userId)
-                .lt(ProblemSubmit::getStatus, ProblemSubmitStatusEnum.SUCCEED.getValue()).one();
-        if (submit != null) {
-            throw new BusinessException(HttpCodeEnum.SUBMIT_ERROR, "提交过于频繁！");
-        }
-
         // 将problem的提交数+1
-        problemMapper.update(new UpdateWrapper<Problem>()
-                .setSql("submit_num = submit_num + 1").eq("id", problem.getId()));
+        int rowsAffected = problemMapper.update(new UpdateWrapper<Problem>()
+                .setSql("submit_num = submit_num + 1").eq("id", problemId));
+        ThrowUtils.throwIf(rowsAffected == 0, new BusinessException(HttpCodeEnum.NOT_EXIST, "题目不存在"));
 
         // 插入problemSubmit
+        Long userId = TokenUtils.getCurrentUid();
         ProblemSubmit problemSubmit = new ProblemSubmit();
         problemSubmit.setUserId(userId);
         problemSubmit.setProblemId(problemId);
@@ -91,7 +82,7 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
     }
 
     @Override
-    public Page<ProblemSubmitVo> listProblemSubmitVoByPage(ProblemSubmitQueryRequest problemSubmitQueryRequest,
+    public Page<ProblemSubmitVo> listProblemSubmitVoByPage(ProblemSubmitQueryReq problemSubmitQueryRequest,
             Long uid) {
         long pageNum = problemSubmitQueryRequest.getCurrent();
         long pageSize = problemSubmitQueryRequest.getSize();
