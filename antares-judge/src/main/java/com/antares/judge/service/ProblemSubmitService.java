@@ -15,9 +15,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface ProblemSubmitService extends IService<ProblemSubmit> {
 
-    ProblemSubmit doProblemSubmit(ProblemSubmitAddReq problemSubmitAddRequest);
+    ProblemSubmitVo doProblemSubmit(ProblemSubmitAddReq problemSubmitAddReq);
 
-    Page<ProblemSubmitVo> listProblemSubmitVoByPage(ProblemSubmitQueryReq problemSubmitQueryRequest, Long uid);
+    Page<ProblemSubmitVo> listProblemSubmitVoByPage(ProblemSubmitQueryReq problemSubmitQueryReq);
 
     SubmitSummaryVo getSubmitSummary(String token);
 }

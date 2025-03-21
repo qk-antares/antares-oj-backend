@@ -1,9 +1,5 @@
 package com.antares.common.model.enums.judge;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import cn.hutool.core.util.ObjectUtil;
 import lombok.Getter;
 
@@ -20,20 +16,12 @@ public enum ProblemSubmitStatusEnum {
     FAILED("解答错误", 2),
     SUCCEED("通过", 3);
 
-    private final String text;
+    private final String msg;
     private final Integer value;
 
     ProblemSubmitStatusEnum(String text, Integer value) {
-        this.text = text;
+        this.msg = text;
         this.value = value;
-    }
-
-    /**
-     * 获取值列表
-     * @return
-     */
-    public static List<Integer> getValues() {
-        return Arrays.stream(values()).map(item -> item.value).collect(Collectors.toList());
     }
 
     /**

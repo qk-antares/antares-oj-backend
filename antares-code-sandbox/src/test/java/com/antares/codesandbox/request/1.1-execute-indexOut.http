@@ -1,0 +1,8 @@
+POST http://127.0.0.1:8013/sandbox/execute
+Content-Type: application/json
+
+{
+  "inputList": ["1 2", "2 3", " 4 5"],
+  "code": "public class Main { public static void main(String[] args) { int[] ans = new int[2]; int tmp = ans[3]; System.out.println(tmp);}}",
+  "language": "java"
+}

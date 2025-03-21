@@ -37,13 +37,7 @@ public class JavaNativeAcmSandbox extends SandboxTemplate {
         if (compileResult.getExitCode() != 0) {
             return ExecuteCodeRes.builder()
                     .code(ExecuteCodeStatusEnum.COMPILE_FAILED.getValue())
-                    .msg(compileResult.getStderr().replaceAll(
-                            String.join(
-                                    File.separator,
-                                    System.getProperty("user.dir"),
-                                    "tmpCode",
-                                    "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"),
-                            ""))
+                    .msg(compileResult.getStderr().replaceAll(codeFile.getParent(), ""))
                     .build();
         }
 
@@ -65,7 +59,8 @@ public class JavaNativeAcmSandbox extends SandboxTemplate {
                         .getEnumByExitCodeEnum(ExitCodeEnum.getEnumByValue(executeResult.getExitCode()));
                 return ExecuteCodeRes.builder()
                         .code(statusEnum.getValue())
-                        .msg(statusEnum.getMsg())
+                        .msg(executeResult.getStderr())
+                        .results(executeResults)
                         .build();
             }
         }
@@ -108,7 +103,7 @@ public class JavaNativeAcmSandbox extends SandboxTemplate {
 
         if (!thread.isAlive()) {
             executeResult = new ExecuteResult();
-            executeResult.setExitCode(-1);
+            executeResult.setExitCode(ExitCodeEnum.TIMEOUT.getValue());
             executeResult.setStderr("超出时间限制");
         }
 

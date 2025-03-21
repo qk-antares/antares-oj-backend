@@ -1,0 +1,8 @@
+POST http://127.0.0.1:8013/sandbox/execute
+Content-Type: application/json
+
+{
+  "inputList": ["1 2", "2 3", " 4 5"],
+  "code": "public class Main {public static void main(String[] args) {try {Thread.sleep(1000);} catch (InterruptedException e) {throw new RuntimeException(e);}System.out.println(1);}}",
+  "language": "java"
+}

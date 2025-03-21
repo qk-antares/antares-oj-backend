@@ -22,6 +22,7 @@ import com.antares.common.model.dto.user.CodeLoginReq;
 import com.antares.common.model.entity.User;
 import com.antares.common.model.enums.HttpCodeEnum;
 import com.antares.user.service.LoginService;
+import com.antares.user.utils.UidUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -121,6 +122,7 @@ public class LoginServiceImpl extends ServiceImpl<UserMapper, User> implements L
                 long uid = snowflake.nextId();
                 register.setUid(uid);
                 register.setEmail(email);
+                register.setUsername(UidUtil.snowflakeUidToString(uid));
 
                 // 设置AK/SK
                 register.setAccessKey(DigestUtil.sha1Hex(uid + RandomUtil.randomString(32)));

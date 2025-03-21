@@ -12,18 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExecuteCodeRes {
-    /**
-     * 执行状态码
-     */
+    // 执行状态码
     private Integer code;
 
-    /**
-     * 执行信息
-     */
+    // 执行信息
     private String msg;
 
-    /**
-     * 执行结果
-     */
+    // 执行结果
     private List<ExecuteResult> results;
 }

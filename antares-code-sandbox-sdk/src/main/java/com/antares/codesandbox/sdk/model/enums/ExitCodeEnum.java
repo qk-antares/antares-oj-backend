@@ -1,9 +1,5 @@
 package com.antares.codesandbox.sdk.model.enums;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import lombok.Getter;
 
 /*
@@ -19,15 +15,6 @@ public enum ExitCodeEnum {
 
     ExitCodeEnum(Integer value) {
         this.value = value;
-    }
-
-    /**
-     * 获取值列表
-     *
-     * @return
-     */
-    public static List<Integer> getValues() {
-        return Arrays.stream(values()).map(item -> item.value).collect(Collectors.toList());
     }
 
     /**

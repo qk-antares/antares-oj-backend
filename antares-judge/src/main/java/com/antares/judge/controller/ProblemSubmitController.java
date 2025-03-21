@@ -49,21 +49,21 @@ public class ProblemSubmitController {
     @TokenCheck
     public R<ProblemSubmitVo> doProblemSubmit(
             @RequestBody @NotNull @Valid ProblemSubmitAddReq problemSubmitAddRequest) {
-        ProblemSubmit submitResult = problemSubmitService.doProblemSubmit(problemSubmitAddRequest);
+        ProblemSubmitVo submitResult = problemSubmitService.doProblemSubmit(problemSubmitAddRequest);
         return R.ok(submitResult);
     }
 
     /**
      * 分页获取题目提交历史
      * 
-     * @param problemSubmitQueryRequest
+     * @param problemSubmitQueryReq
      * @return
      */
     @PostMapping("/page/vo")
     @TokenCheck
     public R<Page<ProblemSubmitVo>> listProblemSubmitVoByPage(
-            @RequestBody ProblemSubmitQueryReq problemSubmitQueryRequest, HttpServletRequest request) {
-        Page<ProblemSubmitVo> page = problemSubmitService.listProblemSubmitVoByPage(problemSubmitQueryRequest, null);
+            @RequestBody ProblemSubmitQueryReq problemSubmitQueryReq) {
+        Page<ProblemSubmitVo> page = problemSubmitService.listProblemSubmitVoByPage(problemSubmitQueryReq);
         // 返回脱敏信息
         return R.ok(page);
     }

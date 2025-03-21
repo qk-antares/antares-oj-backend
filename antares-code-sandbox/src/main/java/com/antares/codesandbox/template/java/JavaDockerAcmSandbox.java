@@ -259,7 +259,8 @@ public class JavaDockerAcmSandbox extends SandboxTemplate {
                             .getEnumByExitCodeEnum(ExitCodeEnum.getEnumByValue(executeResult.getExitCode()));
                     return ExecuteCodeRes.builder()
                             .code(statusEnum.getValue())
-                            .msg(statusEnum.getMsg())
+                            .msg(executeResult.getStderr())
+                            .results(executeResults)
                             .build();
                 }
             }

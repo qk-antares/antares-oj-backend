@@ -1,9 +1,5 @@
 package com.antares.common.model.enums.judge;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import cn.hutool.core.util.ObjectUtil;
 import lombok.Getter;
 
@@ -15,27 +11,15 @@ import lombok.Getter;
 @Getter
 public enum LanguageEnum {
 
-    JAVA("Java", "java"),
-    CPLUSPLUS("C++", "cpp"),
-    GOLANG("JavaScript", "javascript"),
-    PYTHON("Python", "python");
-
-    private final String text;
+    JAVA("Java"),
+    CPP("C++"),
+    GOLANG("JavaScript"),
+    PYTHON("Python");
 
     private final String value;
 
-    LanguageEnum(String text, String value) {
-        this.text = text;
+    LanguageEnum(String value) {
         this.value = value;
-    }
-
-    /**
-     * 获取值列表
-     *
-     * @return
-     */
-    public static List<String> getValues() {
-        return Arrays.stream(values()).map(item -> item.value).collect(Collectors.toList());
     }
 
     /**

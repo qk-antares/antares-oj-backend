@@ -33,4 +33,22 @@ public enum ExecuteCodeStatusEnum {
                 return null;
         }
     }
+
+    /**
+     * 根据 value 获取枚举
+     *
+     * @param value
+     * @return
+     */
+    public static ExecuteCodeStatusEnum getEnumByValue(Integer value) {
+        if (value == null) {
+            return null;
+        }
+        for (ExecuteCodeStatusEnum anEnum : ExecuteCodeStatusEnum.values()) {
+            if (anEnum.value.equals(value)) {
+                return anEnum;
+            }
+        }
+        return null;
+    }
 }
