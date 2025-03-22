@@ -17,7 +17,7 @@ public enum JudgeInfoEnum {
     COMPILE_ERROR("编译失败", 1),
     RUNTIME_ERROR("执行出错", 2),
     TIMEOUT("超出时间限制", 3),
-    WRONG_ANSWER("解答错误", 5);
+    WRONG_ANSWER("解答错误", 4);
 
     private final String msg;
     private final Integer value;

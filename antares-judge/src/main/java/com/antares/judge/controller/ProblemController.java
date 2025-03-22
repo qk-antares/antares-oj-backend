@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.antares.common.annotation.RoleCheck;
 import com.antares.common.annotation.TokenCheck;
 import com.antares.common.constant.UserConstant;
+import com.antares.common.mapper.ProblemMapper;
 import com.antares.common.mapper.ProblemSubmitMapper;
 import com.antares.common.model.dto.R;
 import com.antares.common.model.dto.problem.ProblemAddReq;
@@ -48,9 +49,10 @@ import lombok.extern.slf4j.Slf4j;
 public class ProblemController {
     @Resource
     private ProblemService problemService;
-
     @Resource
     private ProblemSubmitMapper problemSubmitMapper;
+    @Resource
+    private ProblemMapper problemMapper;
 
     /**
      * 创建
@@ -169,5 +171,10 @@ public class ProblemController {
         String token = TokenUtils.getToken();
         Page<SafeProblemVo> page = problemService.listSafeProblemVoByPage(problemQueryReq, token);
         return R.ok(page);
+    }
+
+    @GetMapping("/{id}/{direction}")
+    public R<Long> getAdjacentProblemId(@PathVariable("id") @Min(1) Long id, @PathVariable("direction") String direction) {
+        return R.ok(problemMapper.getAdjacentProblemId(id, direction));
     }
 }

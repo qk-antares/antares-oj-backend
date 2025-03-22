@@ -1,5 +1,7 @@
 package com.antares.common.mapper;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.antares.common.model.entity.Problem;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
@@ -10,7 +12,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.antares.common.model.entity.Problem
 */
 public interface ProblemMapper extends BaseMapper<Problem> {
-
+    Long getAdjacentProblemId(@Param("id") Long id, @Param("direction") String direction);
 }
 
 

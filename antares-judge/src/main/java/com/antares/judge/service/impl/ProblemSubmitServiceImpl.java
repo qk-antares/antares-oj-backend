@@ -1,5 +1,6 @@
 package com.antares.judge.service.impl;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,6 +74,7 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
         problemSubmit.setProblemId(problemId);
         problemSubmit.setCode(problemSubmitAddReq.getCode());
         problemSubmit.setLanguage(language);
+        problemSubmit.setCreateTime(new Date());
         // 设置初始状态
         problemSubmit.setStatus(ProblemSubmitStatusEnum.WAITING.getValue());
         problemSubmit.setJudgeInfo("{}");
@@ -88,16 +90,16 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
     }
 
     @Override
-    public Page<ProblemSubmitVo> listProblemSubmitVoByPage(ProblemSubmitQueryReq problemSubmitQueryRequest) {
-        long pageNum = problemSubmitQueryRequest.getCurrent();
-        long pageSize = problemSubmitQueryRequest.getSize();
-        Long problemId = problemSubmitQueryRequest.getProblemId();
+    public Page<ProblemSubmitVo> listProblemSubmitVoByPage(ProblemSubmitQueryReq problemSubmitQueryReq) {
+        long pageNum = problemSubmitQueryReq.getCurrent();
+        long pageSize = problemSubmitQueryReq.getSize();
+        Long problemId = problemSubmitQueryReq.getProblemId();
         Long uid = TokenUtils.getCurrentUid();
         Page<ProblemSubmit> page = page(new Page<>(pageNum, pageSize),
                 new LambdaQueryWrapper<ProblemSubmit>()
-                        .select(ProblemSubmit.class, item -> !item.getColumn().equals("code"))
                         .eq(ProblemSubmit::getUserId, uid)
-                        .eq(ProblemSubmit::getProblemId, problemId));
+                        .eq(ProblemSubmit::getProblemId, problemId)
+                        .orderByDesc(ProblemSubmit::getCreateTime));
 
         Page<ProblemSubmitVo> voPage = new Page<>(pageNum, pageSize, page.getTotal());
         List<ProblemSubmitVo> records = page.getRecords().stream().map(ProblemSubmitVo::objToVo)
