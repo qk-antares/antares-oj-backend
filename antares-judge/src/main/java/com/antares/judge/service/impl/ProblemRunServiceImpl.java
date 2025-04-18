@@ -4,27 +4,27 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.antares.codesandbox.sdk.model.dto.ExecuteCodeReq;
 import com.antares.codesandbox.sdk.model.dto.ExecuteCodeRes;
-import com.antares.common.mapper.UserMapper;
-import com.antares.common.model.entity.User;
-import com.antares.common.utils.TokenUtils;
+import com.antares.common.auth.utils.TokenUtils;
 import com.antares.judge.codesandbox.CodeSandbox;
 import com.antares.judge.codesandbox.CodeSandboxFactory;
 import com.antares.judge.service.ProblemRunService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.antares.user.api.dto.SecretDTO;
+import com.antares.user.api.service.UserInnerService;
 
 @Service
 public class ProblemRunServiceImpl implements ProblemRunService {
     @Resource
     private CodeSandboxFactory codeSandboxFactory;
-    @Resource
-    private UserMapper userMapper;
     @Value("${antares.code-sandbox.type:remote}")
     private String type;
+    @DubboReference
+    private UserInnerService userInnerService;
 
     @Override
     public ExecuteCodeRes doProblemRun(ExecuteCodeReq request) {
@@ -40,11 +40,9 @@ public class ProblemRunServiceImpl implements ProblemRunService {
                 .build();
 
         Long userId = TokenUtils.getCurrentUid();
-        User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                .select(User::getAccessKey, User::getSecretKey).eq(User::getUid, userId));
-        ExecuteCodeRes response = codeSandbox.executeCode(executeCodeRequest, user.getAccessKey(),
-                user.getSecretKey());
-
+        SecretDTO secretDTO = userInnerService.getSecretByUid(userId);
+        ExecuteCodeRes response = codeSandbox.executeCode(executeCodeRequest, secretDTO.getSecretId(),
+                secretDTO.getSecretKey());
         return response;
     }
 }

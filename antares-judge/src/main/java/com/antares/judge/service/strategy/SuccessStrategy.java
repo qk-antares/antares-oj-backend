@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 
 import com.antares.codesandbox.sdk.model.dto.ExecuteCodeRes;
 import com.antares.codesandbox.sdk.model.dto.ExecuteResult;
-import com.antares.common.model.dto.problem.JudgeConfig;
-import com.antares.common.model.enums.judge.JudgeInfoEnum;
-import com.antares.common.model.vo.problemsubmit.JudgeInfo;
+import com.antares.judge.model.dto.problem.JudgeConfig;
+import com.antares.judge.model.enums.JudgeInfoEnum;
+import com.antares.judge.model.vo.problemsubmit.JudgeInfo;
 
 import cn.hutool.core.util.StrUtil;
 

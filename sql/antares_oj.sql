@@ -1,10 +1,11 @@
+-- Active: 1742304644523@@172.17.0.1@3306@antares_oj
 CREATE TABLE `user` (
   `uid` bigint unsigned NOT NULL COMMENT '用户id',
   `username` varchar(64) DEFAULT NULL COMMENT '用户名',
   `email` varchar(64) NOT NULL COMMENT '邮箱',
   `password` varchar(128) DEFAULT NULL COMMENT '密码',
   `user_role` varchar(64) NOT NULL DEFAULT 'user' COMMENT '用户权限',
-  `access_key` char(40) DEFAULT NULL,
+  `secret_id` char(40) DEFAULT NULL,
   `secret_key` char(40) DEFAULT NULL,
   `tags` varchar(512) DEFAULT '[]' COMMENT '用户标签',
   `signature` varchar(256) DEFAULT NULL COMMENT '个性签名',

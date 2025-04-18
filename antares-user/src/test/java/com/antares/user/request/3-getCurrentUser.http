@@ -1,3 +1,3 @@
-GET  http://127.0.0.1:8011/user/current 
+GET  http://127.0.0.1:8024/api/user/current 
 Content-Type: application/json
-Cookie: token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjE4NDg2NTMxNDk4MTI5NTMwODgsInVzZXJSb2xlIjoiYWRtaW4iLCJleHAiOjE3MzYyNDE3MjJ9.noQv3wKDkrdrewJpQDnB0rYJ0tqffwR7MmBjCoP9DJc
+Cookie: token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjE4NDg2NTMxNDk4MTI5NTMwODgsInVzZXJSb2xlIjoiYWRtaW4iLCJleHAiOjE3NDU1Njg2MDR9.j5S8eIJIIhIwNp0-Nodz9kzxx6qthgxTAP0NM5TmdTw

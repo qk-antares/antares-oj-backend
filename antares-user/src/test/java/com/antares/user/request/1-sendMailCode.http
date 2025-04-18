@@ -1,1 +1,1 @@
-GET http://127.0.0.1:8011/user/email/sendCode?email=1716607668@qq.com
+GET http://127.0.0.1:8024/api/user/email/sendCode?email=1716607668@qq.com

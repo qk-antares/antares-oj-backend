@@ -3,17 +3,18 @@ package com.antares.user.controller;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.Email;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.antares.common.annotation.TokenCheck;
-import com.antares.common.model.dto.R;
-import com.antares.common.model.dto.user.AccountLoginRequest;
-import com.antares.common.model.dto.user.CodeLoginReq;
-import com.antares.common.utils.TokenUtils;
+import com.antares.common.core.dto.R;
+import com.antares.user.model.dto.AccountLoginReq;
+import com.antares.user.model.dto.CodeLoginReq;
 import com.antares.user.service.LoginService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +28,26 @@ public class LoginController {
     private LoginService loginService;
 
     /**
+     * 发送邮箱验证码
+     * 
+     * @param email
+     * @return
+     */
+    @GetMapping(value = "/email/sendCode")
+    public R<Void> sendMailCode(@Email @RequestParam("email") String email) {
+        loginService.sendMailCode(email);
+        return R.ok();
+    }
+
+    /**
      * 账号密码登录
-     * @param accountLoginRequest
+     * @param accountLoginReq
      * @param response
      * @return
      */
     @PostMapping(value = "/login")
-    public R<Void> loginByAccount(@Valid @RequestBody AccountLoginRequest accountLoginRequest, HttpServletResponse response) {
-        loginService.loginByAccount(accountLoginRequest, response);
+    public R<Void> loginByAccount(@Valid @RequestBody AccountLoginReq accountLoginReq, HttpServletResponse response) {
+        loginService.loginByAccount(accountLoginReq, response);
         return R.ok();
     }
 
@@ -47,13 +60,6 @@ public class LoginController {
     @PostMapping(value = "/loginByCode")
     public R<Void> loginByCode(@Valid @RequestBody CodeLoginReq req, HttpServletResponse res) {
         loginService.loginByCode(req, res);
-        return R.ok();
-    }
-
-    @PostMapping(value = "/logout")
-    @TokenCheck
-    public R<Void> logout() {
-        loginService.logout(TokenUtils.getToken());
         return R.ok();
     }
 }

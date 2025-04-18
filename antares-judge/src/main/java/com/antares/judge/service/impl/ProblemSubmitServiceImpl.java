@@ -6,27 +6,28 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
+import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.stereotype.Service;
 
-import com.antares.common.exception.BusinessException;
-import com.antares.common.mapper.ProblemMapper;
-import com.antares.common.mapper.ProblemSubmitMapper;
-import com.antares.common.mapper.UserMapper;
-import com.antares.common.model.dto.problemsubmit.ProblemSubmitAddReq;
-import com.antares.common.model.dto.problemsubmit.ProblemSubmitQueryReq;
-import com.antares.common.model.entity.Problem;
-import com.antares.common.model.entity.ProblemSubmit;
-import com.antares.common.model.entity.User;
-import com.antares.common.model.enums.HttpCodeEnum;
-import com.antares.common.model.enums.judge.LanguageEnum;
-import com.antares.common.model.enums.judge.ProblemDifficultyEnum;
-import com.antares.common.model.enums.judge.ProblemSubmitStatusEnum;
-import com.antares.common.model.vo.problemsubmit.ProblemSubmitVo;
-import com.antares.common.model.vo.problemsubmit.SubmitSummaryVo;
-import com.antares.common.utils.ThrowUtils;
-import com.antares.common.utils.TokenUtils;
+import com.antares.common.auth.utils.TokenUtils;
+import com.antares.common.core.enums.HttpCodeEnum;
+import com.antares.common.core.exception.BusinessException;
+import com.antares.common.core.utils.ThrowUtils;
+import com.antares.judge.mapper.ProblemMapper;
+import com.antares.judge.mapper.ProblemSubmitMapper;
+import com.antares.judge.model.dto.problemsubmit.ProblemSubmitAddReq;
+import com.antares.judge.model.dto.problemsubmit.ProblemSubmitQueryReq;
+import com.antares.judge.model.entity.Problem;
+import com.antares.judge.model.entity.ProblemSubmit;
+import com.antares.judge.model.enums.LanguageEnum;
+import com.antares.judge.model.enums.ProblemDifficultyEnum;
+import com.antares.judge.model.enums.ProblemSubmitStatusEnum;
+import com.antares.judge.model.vo.problemsubmit.ProblemSubmitVo;
+import com.antares.judge.model.vo.problemsubmit.SubmitSummaryVo;
 import com.antares.judge.service.JudgeService;
 import com.antares.judge.service.ProblemSubmitService;
+import com.antares.user.api.dto.SecretDTO;
+import com.antares.user.api.service.UserInnerService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -48,9 +49,9 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
     @Resource
     private JudgeService judgeService;
     @Resource
-    private UserMapper userMapper;
-    @Resource
     private Snowflake snowflake;
+    @DubboReference
+    private UserInnerService userInnerService;
 
     // TODO 限流，防止用户频繁提交
     @Override
@@ -82,10 +83,9 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
         ThrowUtils.throwIf(!save, HttpCodeEnum.INTERNAL_SERVER_ERROR, "提交失败");
 
         // 执行判题服务
-        User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                .select(User::getAccessKey, User::getSecretKey).eq(User::getUid, userId));
-        ProblemSubmitVo submitResult = judgeService.doJudge(problemSubmit, user.getAccessKey(),
-                user.getSecretKey());
+        SecretDTO secretDTO = userInnerService.getSecretByUid(userId);
+        ProblemSubmitVo submitResult = judgeService.doJudge(problemSubmit, secretDTO.getSecretId(),
+                secretDTO.getSecretKey());
         return submitResult;
     }
 
@@ -109,10 +109,10 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
     }
 
     @Override
-    public SubmitSummaryVo getSubmitSummary(String token) {
+    public SubmitSummaryVo getSubmitSummary() {
         SubmitSummaryVo summaryVo = new SubmitSummaryVo();
 
-        Long uid = TokenUtils.getUidFromToken(token);
+        Long uid = TokenUtils.getCurrentUid();
 
         // 获取简单、中等、困难题目ids
         List<Long> easyIds = problemMapper.selectList(new LambdaQueryWrapper<Problem>()

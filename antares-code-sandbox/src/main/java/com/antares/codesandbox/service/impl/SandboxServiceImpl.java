@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.antares.codesandbox.model.dto.ExecuteCodeReq;
 import com.antares.codesandbox.model.dto.ExecuteCodeRes;
+import com.antares.codesandbox.model.enums.LanguageEnum;
 import com.antares.codesandbox.service.SandboxService;
 import com.antares.codesandbox.template.SandboxTemplate;
-import com.antares.common.model.enums.judge.LanguageEnum;
 
 @Service
 public class SandboxServiceImpl implements SandboxService {

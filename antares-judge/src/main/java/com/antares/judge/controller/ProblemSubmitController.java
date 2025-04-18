@@ -10,17 +10,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.antares.common.annotation.TokenCheck;
-import com.antares.common.model.dto.R;
-import com.antares.common.model.dto.problemsubmit.ProblemSubmitAddReq;
-import com.antares.common.model.dto.problemsubmit.ProblemSubmitQueryReq;
-import com.antares.common.model.entity.ProblemSubmit;
-import com.antares.common.model.vo.problemsubmit.ProblemSubmitVo;
-import com.antares.common.model.vo.problemsubmit.SubmitSummaryVo;
+import com.antares.common.auth.annotation.TokenCheck;
+import com.antares.common.core.dto.R;
+import com.antares.judge.model.dto.problemsubmit.ProblemSubmitAddReq;
+import com.antares.judge.model.dto.problemsubmit.ProblemSubmitQueryReq;
+import com.antares.judge.model.entity.ProblemSubmit;
+import com.antares.judge.model.vo.problemsubmit.ProblemSubmitVo;
+import com.antares.judge.model.vo.problemsubmit.SubmitSummaryVo;
 import com.antares.judge.service.ProblemSubmitService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
@@ -89,8 +88,8 @@ public class ProblemSubmitController {
      */
     @GetMapping("/summary")
     @TokenCheck
-    public R<SubmitSummaryVo> getSubmitSummary(@RequestHeader("Authorization") String token) {
-        SubmitSummaryVo vo = problemSubmitService.getSubmitSummary(token);
+    public R<SubmitSummaryVo> getSubmitSummary() {
+        SubmitSummaryVo vo = problemSubmitService.getSubmitSummary();
         return R.ok(vo);
     }
 

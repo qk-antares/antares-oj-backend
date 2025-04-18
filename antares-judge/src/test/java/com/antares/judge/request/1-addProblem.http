@@ -1,4 +1,4 @@
-POST http://127.0.0.1:8012/judge/problem 
+POST http://127.0.0.1:8024/api/judge/problem 
 Content-Type: application/json
 Cookie: token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjE4NDg2NTMxNDk4MTI5NTMwODgsInVzZXJSb2xlIjoiYWRtaW4iLCJleHAiOjE3MzExMjI3MTJ9.DvF_P5zaSqoz-3Agu876VDIBwXqkAOncmvRznsmZZ8Y
 

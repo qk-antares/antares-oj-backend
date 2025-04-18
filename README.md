@@ -2,13 +2,9 @@
 
 ### 1. 项目简介
 
-该项目是基于微服务的算法题在线评测系统，分为`网关`、`用户`、`判题`和`代码沙箱`4个微服务。在系统前台，管理员可以创建、管理题目，用户可以搜索、查看题目，编写代码并进行在线自测和提交。在系统后端，自主实现了代码沙箱，能够根据接收的测试用例对代码进行编译、运行并给出输出结果。代码沙箱作为独立服务，可以提供给其他开发者使用。
+该项目是基于Docker代码沙箱的算法题在线评测系统（Online Judge，OJ），分为`网关`、`用户`、`判题`和`代码沙箱`4个微服务。在系统前端，管理员可以创建、管理题目，用户可以查看题目，编写代码并进行在线自测和提交；在系统后端，自主实现了代码沙箱，能够对代码进行编译，在用户设置的测试用例上运行并输出结果信息（输出流、运行耗时、内存占用等），且代码沙箱作为独立服务，可以提供给其他开发者使用。
 
-- 前端基于 **Vue3 + Arco Design**（高仿leetcode）。
-- 后端实现了**ACM模式的本地代码沙箱和Docker沙箱**，支持**在线测试，运行时间和内存占用统计**；使用了 API签名认证（AK/SK）
-- 为了方便开发者用户调用我实现的代码沙箱，写了一个SDK。
-
-github仓库：
+GitHub仓库：
 
 - 后端：[qk-antares/antares-oj-backend (github.com)](https://github.com/qk-antares/antares-oj-backend)
 - 前端：[qk-antares/antares-oj-frontend (github.com)](https://github.com/qk-antares/antares-oj-frontend)
@@ -41,9 +37,42 @@ github仓库：
 
 #### 1.2 技术栈
 
+##### 1.2.1 前端技术栈
 
 
 
+
+
+##### 1.2.2 后端技术栈
+
+- Spring Cloud Gateway：
+  1. 请求路由：根据请求的URL将请求转发到不同的服务 [[链接]](#####2.1.1 根据请求的URL将请求转发到不同的服务)
+  1. 统一处理CORS（跨域资源共享） [[链接]](#####2.1.3 统一处理CORS)
+- Nacos：
+  1. 服务注册与发现
+  2. 动态配置管理
+- Spring Boot：
+  1. AOP切面编程搭配自定义异常来对异常做统一处理；
+  2. 定时任务（计算文章得分并刷新热榜，每日刷新推荐用户，定时将文章浏览量从redis同步到数据库）
+  3. 使用validation相关注解对请求的参数进行校验
+- MySQL
+  1. 数据持久化，项目涉及到了极少量复杂查询
+- Redis：
+  1. 缓存，包括热点文章，文章点赞、收藏、浏览量，推荐用户，消息通知数等。其中文章点赞、收藏、浏览量、消息通知是永久存储的（结合OpenResty的lua脚本，把查询缓存的逻辑前置到nginx，进一步提高响应速度）
+  2. 分布式锁（只用到了定时任务）
+- Elastic Search：
+  1. 搭配Jsoup爬虫，实现了聚合搜索功能
+  2. 搭配canal实现MySQL和ES的数据同步
+- Netty：
+  1. 私聊（消息持久化、离线消息、消息通知，在线聊天过程中切换对话，接收不同对话的消息...）
+- RabbitMQ：
+  1. 最简单的应用，异步处理点赞、收藏、关注、发邮件等消息，提高响应速度。只用到了直接交换机
+- Nginx：
+  1. 反向代理服务器
+  2. lua脚本
+- 其他：
+  1. CompletableFuture异步编程
+  2. 余弦相似度算法
 
 
 
@@ -52,14 +81,14 @@ github仓库：
 #### 1.3 项目结构
 
 ```bash
-├── antares-code-sandbox	# 代码沙箱服务 
-├── antares-code-sandbox-sdk	# 调用代码沙箱的sdk
-├── antares-common	# 各服务的公共依赖
-├── antares-gateway	# 网关服务
-├── antares-judge	# 判题服务
-├── antares-user	# 用户服务
-├── script	# 内存监控脚本
-└── sql	# 数据库脚本
+├── antares-code-sandbox    # 代码沙箱服务 
+├── antares-code-sandbox-sdk    # 调用代码沙箱的sdk
+├── antares-common  # 各服务的公共依赖
+├── antares-gateway # 网关服务
+├── antares-judge   # 判题服务
+├── antares-user    # 用户服务
+├── script  # 内存监控脚本
+└── sql # 数据库脚本
 ```
 
 ---
@@ -88,26 +117,324 @@ github仓库：
 
 ### 2. 后端技术点
 
+#### 2.1 Gateway
+
+[Spring Cloud Gateway 中文文档](https://springdoc.cn/spring-cloud-gateway/)
+
+> Spring Cloud Gateway提供了一个建立在Spring生态系统之上的**API网关**，旨在提供一种简单而有效的方式来路由到API，并为其提供跨领域的关注，如：安全、监控/指标和容错。
+
+##### 2.1.1 根据请求的URL将请求转发到不同的服务
+
+Spring Cloud Gateway通过 **路由规则匹配** 实现将不同的请求路由到不同的目标服务，路由规则通过 `application.yml` 配置文件定义：
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        # 前端项目都带/api前缀
+        - id: user_route
+          uri: lb://antares-user
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - RewritePath=/api/(?<segment>.*), /$\{segment}
+
+        - id: sandbox_route
+          uri: lb://antares-code-sandbox
+          predicates:
+            - Path=/api/sandbox/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+```
+
+每一项路由规则由下面4个部分组成：**ID、目的地URI、谓词（Predicate）集合、过滤器（Filter）集合**
+
+- id：每个路由的唯一标识符
+- uri：表示目标服务的地址，`lb://` 前缀表示通过 **负载均衡** 来路由到一个注册在服务注册中心中的服务实例
+- **谓词（Predicate）**：在HTTP请求中的任何内容上进行匹配，比如Header或者查询参数
+- **过滤器（Filter）**：在发送下游请求之前或之后修改请求和响应
+
+<img src="https://springdoc.cn/spring-cloud-gateway/images/spring_cloud_gateway_diagram.png" alt="Spring Cloud Gateway Diagram" style="zoom: 80%;" />
+
+---
+
+##### 2.1.2 负载均衡
+
+Spring Cloud Gateway 提供了 **负载均衡** 的支持，主要依赖于 **Spring Cloud LoadBalancer** 来实现。负载均衡允许将流量均匀分配到服务的多个实例上。
+
+> Spring Cloud Gateway依赖默认包含了LoadBalancer
+>
+> ```xml
+> <dependency>
+>   <groupId>org.springframework.cloud</groupId>
+>   <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+>   <version>3.1.4</version>
+>   <scope>compile</scope>
+>   <optional>true</optional>
+> </dependency>
+> ```
+>
+> 但这是一个optional的依赖，也就意味着只有在`application.yml`中有相关的配置时才会引入：
+>
+> ```yml
+> spring:
+>   cloud:
+>     loadbalancer:
+>       ribbon:
+>         NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule  # 随机策略
+> ```
+>
+> 否则还是要手动引入LoadBalancer
+
+###### 负载均衡的策略
+
+- **轮询（Round Robin）**：每次请求轮流分发到不同的服务实例。
+- **随机（RandomRule）**：随机选择一个服务实例。
+- **加权（WeightedResponseTimeRule）**：根据服务实例的权重分配请求。
+- **最少连接数（LeastConnectionsRule）**：转发到当前连接数最少的服务实例
+- **基于 IP 地址的负载均衡（ZoneAwareLoadBalancer）**：根据请求的源 IP 地址选择服务实例
+
+###### LoadBalancer缓存
+
+在我们运行Gateway项目的时候，往往会遇到下面的WARNING：
+
+```shell
+2025-04-11 19:33:37.914  WARN 407989 --- [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+
+# 当前使用的是 默认缓存实现，该实现适用于开发和测试环境，但在生产环境中建议使用 Caffeine Cache，因为 Caffeine 提供了更高效的缓存功能，尤其是在高并发和大规模服务请求场景下。
+```
+
+Spring Cloud LoadBalancer 使用缓存来提高服务发现性能（缓存服务实例列表），避免频繁向注册中心查询服务实例，提升网关转发效率。
+
+---
+
+##### 2.1.3 统一处理CORS
+
+```java
+@Configuration
+public class CorsConfig {
+    @Bean
+    public CorsWebFilter corsWebFilter(){
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+
+        //配置跨域
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        config.addAllowedOriginPattern("*");
+        config.setAllowCredentials(true);
+
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsWebFilter(source);
+    }
+}
+```
+
+###### 跨域请求的流程/工作原理
+
+1. **浏览器发起请求**时，若发现请求跨域（Origin 不同），就会触发 **CORS 机制**
+
+   > **Origin（来源）** 是指浏览器用于标识请求的域的组成部分，它包括以下三个部分：
+   >
+   > 1. **协议（Scheme）**：如 `http://` 或 `https://`
+   > 2. **主机（Host）**：如 `www.example.com`
+   > 3. **端口（Port）**：如 `80`（HTTP默认端口）或 `443`（HTTPS默认端口）
+
+2. **浏览器自动发送一条预检请求（OPTIONS）**
+
+   - 检查服务端是否允许跨域访问
+   - 请求中会带上 `Origin`、`Access-Control-Request-Method` 等头
+
+3. **服务端必须响应这些特殊的 CORS 请求**
+
+   - 响应头中需要包含如：`Access-Control-Allow-Origin`、`Access-Control-Allow-Methods` 等
+
+4. 如果服务端响应通过，浏览器才会真正发起原本的请求（GET、POST 等）
+
+###### 为什么不允许跨域
+
+跨域限制（CORS）是**浏览器**的安全策略，目的是为了防止前端页面从 A 网站恶意获取 B 网站的数据（例如：A网站是一个恶意网站，该网站发送请求获取你在B网站登录的会话），也即**跨站请求伪造（CSRF）攻击**和**跨站脚本攻击（XSS）**
+
+---
+
+##### 2.1.4 Spring Cloud Gateway和Nginx
+
+两者都可以做请求的转发、负载均衡，在定位上有什么区别呢？
+
+| 特性         | **Spring Cloud Gateway**                             | **Nginx**                              |
+| ------------ | ---------------------------------------------------- | -------------------------------------- |
+| **设计目标** | 微服务架构中的 API 网关                              | 反向代理、负载均衡、静态资源服务       |
+| **适用场景** | 动态路由、负载均衡、微服务间通信、API 管理           | 静态资源、负载均衡、反向代理、SSL 终止 |
+| **功能**     | 动态路由、负载均衡、身份验证、限流、熔断、日志记录等 | 高效的反向代理、静态资源处理、负载均衡 |
+| **性能**     | 适合微服务架构，性能较低                             | 高并发、静态资源处理能力强             |
+
+总的来说，Gateway的拓展功能更加丰富，如身份验证、限流、日志等；而Nginx也许能实现这些功能，但是需要通过lua脚本和OpenResty，相对来说更复杂。
+
+另一方面，Nginx的性能更高，尤其适合静态资源（Web前端），Gateway更多是作为后端项目的API网关。
+
+---
+
+##### 2.1.5 内部接口
+
+在微服务的实践中，我们可能会遇到下面的安全需求——**有些接口只给内部服务调用，而不应该被外部用户访问**
+
+为达到这个目标，有几种实践方案：
+
+###### 添加认证机制
+
+这些接口虽然是暴漏的，在调用时必须带上特定标识，只允许认证通过的服务访问。这里特定的标识，是管理人员自己设置的一个Token，普通用户不知道。
+
+###### 网关控制访问路径
+
+由于外部用户**能且仅能通过网关来访问微服务**，我们可以直接在网关层面屏蔽掉这些接口。例如，暴漏给用户的接口是public前缀的，而内部接口是internal前缀的
+
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user/public/**   # 只暴露 /public 接口
+```
+
+这样用户请求`/user/internal/**`时，由于它不符合任何的路由规则，该请求根本不会被转发到后面的微服务。内部的微服务位于同一局域网内，它们之间可以相互调用且不直接对外暴漏。
+
+###### RPC调用
+
+RPC是通过网络调用远程系统（通常是另一台计算机）上的函数或过程，就像调用本地函数一样。RPC不会向外暴漏HTTP接口，其具体的实现方式一般如下：
+
+- a-api抽象出接口
+- service-a实现a-api中的接口（@DubboService），并在启动后将自身信息注册到注册中心
+- service-b引用a-api中的接口（@DubboReference），虽然不去实现这些接口，但可以直接调用
+
+由于在实践中，微服务（service-a，service-b）不直接对外暴漏，且这些微服务位于同一局域网下，所以可以确保内部相互调用而用户无法访问
+
+---
+
+#### 2.2 Nacos
+
+服务提供者将服务注册到 Nacos，服务消费者通过 Nacos 获取服务实例列表，实现服务间调用。
+
+
+
+
+
+
+
+---
+
+#### 2.3 API签名认证
+
+API签名认证是一种用于保护Web API的身份验证机制。它用于验证发送API请求的客户端或用户的身份，并确保请求数据在传输过程中没有被篡改。API签名认证通常涉及以下步骤：
+
+1. 请求创建： 客户端创建API请求，并包括必要的请求参数、数据和请求头
+2. 签名生成： 客户端使用密钥和一些请求信息（如时间戳等）来生成一个唯一的数字签名sign。签名生成通常使用哈希算法（如HMAC-SHA256）
+3. 签名附加： 客户端将生成的数字签名附加到API请求中，通常是在请求头或请求参数中
+4. 服务器验证： 服务端收到API请求后，会使用相同的密钥和接收到的请求信息来生成签名。然后，它将生成的签名与请求中的签名sign进行比较。
+
+> ⚠️如果生成签名的过程中没有使用某个请求数据，那么对该请求数据的篡改将是不可知的
+
+在日常使用软件中，我们可能会注意到有两种API认证方式：
+
+- 方式一：只有一个密钥
+
+  在注册SM.MS图床后，网站会提供一个Secret Token（可以随时查看），把Secret Token填写到PicGo这类软件中后，就可以方便地将图片上传到SM.MS
+
+  ![image-20250412164038994](https://s2.loli.net/2025/04/12/p4NXAD9LvSJePW3.png)
+
+- 方式二：有两个密钥
+
+  在注册腾讯云后，网站会提供给我们一对密钥，分别叫SecretId和SecretKey，且SecretKey只能在创建时告诉用户一次，之后无法查看，只能重新创建。有了这两个密钥，我们就可以通过ddns-go动态修改所购买域名的域名解析。 
+
+  ![image-20250412164357645](https://s2.loli.net/2025/04/12/CpUgPGrxm4Z5kh9.png)
+
+这两种认证方式是如何工作的？有什么区别？
+
+---
+
+##### 2.3.1 单密钥
+
+网站给你一个 `SecretToken`，你在软件中配置这个 Token，它会被加到 HTTP 请求头中：
+
+```http
+POST /upload
+Authorization: Bearer sk_123456789abcdef
+```
+
+在这种场景下，`SecretToken`就是用户的身份标识。但是和JWT还不同，`SecretToken`中并不包含状态信息（Payload），它只是一个静态的、用户唯一的标识。当网站接受到你的请求时，他会在自己的数据库中查询有没有这个Token并确定你是谁。
+
+单密钥的整个过程不涉及加密/签名，轻量简单。
+
+---
+
+##### 2.3.2 SecretId+SecretKey
+
+在这种场景下，`SecretId` 相当于你的用户名，`SecretKey` 则是你的密码，用于签名（不直接参与网络传输）。每次请求都要用这两个参数进行**签名计算**，类似这样：
+
+```http
+POST /ddns/update
+Action: UpdateDomainRecord
+Timestamp: 1682341234
+SecretId: sid_123456789
+Signature: sha256_hmac(secretKey, 所有参数)
+
+{
+	"domain": "a.com",
+	"ip": "1.2.3.4"
+}
+```
+
+当服务端接收到这个请求时，首先根据`SecretId`去数据库中查询对应的`SecretKey`，然后对请求参数（Timestamp、SecretId、domain，ip）进行同样的签名操作，然后与Signature进行比较。总的来说，`SecretId`+`SecretKey`的方案依然是一种**对称加密（哈希消息认证码，HMAC）**。
+
+###### 防篡改
+
+签名计算的目的是为了防止请求参数的篡改。例如，你的请求被某个中间人截获，如果他修改某个请求参数（他无法修改Signature），那么服务端进行签名操作得到的结果就会和Signature不同，进而拒绝请求。
+
+###### 防重放
+
+1. Timestamp
+
+   携带Timestamp是为了防止重放攻击。想象某个中间人截获了你的转账请求，他不进行数据篡改，而是反复重放该请求，那么也会造成攻击效果。为此可以将请求的时间戳作为参数的一部分，也进行签名（这意味着攻击者无法篡改时间戳），后端在执行业务逻辑之前首先判断该时间戳是否在范围之内。
+
+2. nonce（随机串）+缓存机制
+
+   单纯携带Timestamp并不能解决“**短时重放攻击**”的问题，为此，可以再加上一招：nonce（随机串）+缓存机制。客户端请求时，加入 `timestamp + nonce` 参数，服务端校验时，判断 `timestamp` 在时间窗口内（如1分钟），且**在该时间窗口内 nonce 是否首次出现**。如果 `nonce` 在时间窗口内已经出现过一次，直接拒绝请求，否则将 `nonce` 加入缓存（如 Redis），设置过期时间 1分钟
+
+   ```markdown
+   接收到请求
+       ↓
+   检查 timestamp 是否过期
+       ↓
+   检查 nonce 是否在缓存中
+       ├─ 是 → 拒绝（重放）
+       └─ 否 → 验证签名 → 缓存 nonce（5分钟） → 通过
+   ```
+
+---
+
+##### 2.3.3 非对称加密
+
+上面提到了`SecretId`+`SecretKey`的方案本质是一种对称加密，那么为什么需要非对称加密，以及它是如何工作的？
+
+分析`SecretId`+`SecretKey`的工作流程，客户端需要使用`SecretKey`对请求数据进行签名，尽管普通的业务不会发生`SecretKey`的传输，但用户获取自己`SecretKey`的过程依然会发生`SecretKey`的传输（这也是为什么腾讯云只给你看一次`SecretKey`，再想查看只能重建）
+
+以HTTPS来说明非对称加密的流程：
+
+1. 服务器把公钥发给客户端
+2. 客户端生成一个对称加密用的 AES 密钥
+3. 客户端用服务器公钥加密 AES 密钥，发回给服务器
+4. 服务器用私钥解密得到 AES 密钥
+5. 后续通信用 AES（对称加密）进行加密传输
+
+非对称加密的目的是为了传输一个对称加密通信使用的密钥AES（相当于上面的SecretKey，但避免了直接传输），一旦完成了AES的传输，后续的通信是通过对称加密实现的。用公钥加密的数据只有对应的私钥才能解密，客户端从始至终都不知道私钥，也从未发生AES密钥的直接传输。
+
+---
+
 #### 2.1 API签名认证
-
-什么是API签名认证
-
-```
-API签名认证（API Signature Authentication）是一种用于保护Web API（Application Programming Interface，应用程序编程接口）的身份验证机制。它用于验证发送API请求的客户端或用户的身份，并确保请求数据在传输过程中没有被篡改。API签名认证通常涉及以下步骤：
-①请求创建： 客户端创建API请求，并包括必要的请求参数、数据和请求头。
-②签名生成： 客户端使用预共享的密钥（API密钥或令牌）和一些请求信息（如HTTP方法、请求URL、时间戳等）来生成一个唯一的数字签名。签名生成通常使用哈希算法（如HMAC-SHA256）来加密这些信息。
-③签名附加： 客户端将生成的数字签名附加到API请求中，通常是在请求头、请求参数或特定的请求字段中。
-④服务器验证： 服务端收到API请求后，会使用相同的密钥和接收到的请求信息来生成签名。然后，它将生成的签名与请求中的签名进行比较。
-⑤比较签名： 服务器将客户端提供的签名与自己生成的签名进行比较。如果两者匹配，说明请求是有效的，客户端身份已验证。如果签名不匹配，请求将被视为无效或潜在的恶意请求。
-
-API签名认证的优点包括：
-①身份验证： 确保请求的发送方是已授权的客户端或用户。
-②数据完整性： 通过签名验证，可以确保请求数据在传输过程中没有被篡改。
-③安全性： API密钥等敏感信息不会在请求中明文传输，从而增加了安全性。
-④防止重放攻击： 通过时间戳或一次性令牌，API签名可以有效防止恶意重复使用请求。
-
-API签名认证是保护API安全的一种重要方式，特别是在公共互联网上运行的API服务中。许多云服务提供商和Web应用程序框架都支持API签名认证，开发人员可以利用这些工具来轻松实现API身份验证和数据保护。
-```
 
 在我的项目中，API签名认证是在调用代码沙箱的这个过程，核心代码片段如下：
 

@@ -8,8 +8,13 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import com.antares.common.exception.BusinessException;
-import com.antares.common.model.enums.HttpCodeEnum;
+import com.antares.common.core.enums.HttpCodeEnum;
+import com.antares.common.core.exception.BusinessException;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Component
 public class MailUtil {
@@ -35,5 +40,15 @@ public class MailUtil {
         } catch (Exception e) {
             throw new BusinessException(HttpCodeEnum.INTERNAL_SERVER_ERROR, "邮件发送失败");
         }
+    }
+
+    @Data
+    @ToString
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class MailBean {
+        private String recipient;// 邮件接收人
+        private String subject; // 邮件主题
+        private String content; // 邮件内容
     }
 }

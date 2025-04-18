@@ -233,7 +233,7 @@ public class JavaDockerAcmSandbox extends SandboxTemplate {
                 log.info("内存占用: {} bytes", maxMemoryUsage.get());
 
                 ExecuteResult executeResult = ExecuteResult.builder()
-                        .exitCode(0)
+                        .exitCode(ExitCodeEnum.SUCCESS.getValue())
                         .stdout(stdout)
                         .stderr(stderr)
                         .time(elapsedTime)
@@ -241,14 +241,14 @@ public class JavaDockerAcmSandbox extends SandboxTemplate {
                         .build();
 
                 if (!thread.isAlive()) {
-                    executeResult.setExitCode(-1);
+                    executeResult.setExitCode(ExitCodeEnum.TIMEOUT.getValue());
                     executeResult.setStderr("超出时间限制");
                 }
 
                 thread.interrupt();
 
                 if (StrUtil.isNotBlank(stderr)) {
-                    executeResult.setExitCode(-1);
+                    executeResult.setExitCode(ExitCodeEnum.RUN_FAILED.getValue());
                 }
 
                 executeResults.add(executeResult);

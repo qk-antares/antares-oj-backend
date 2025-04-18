@@ -1,10 +1,10 @@
 package com.antares.judge.service;
 
-import com.antares.common.model.dto.problemsubmit.ProblemSubmitAddReq;
-import com.antares.common.model.dto.problemsubmit.ProblemSubmitQueryReq;
-import com.antares.common.model.entity.ProblemSubmit;
-import com.antares.common.model.vo.problemsubmit.ProblemSubmitVo;
-import com.antares.common.model.vo.problemsubmit.SubmitSummaryVo;
+import com.antares.judge.model.dto.problemsubmit.ProblemSubmitAddReq;
+import com.antares.judge.model.dto.problemsubmit.ProblemSubmitQueryReq;
+import com.antares.judge.model.entity.ProblemSubmit;
+import com.antares.judge.model.vo.problemsubmit.ProblemSubmitVo;
+import com.antares.judge.model.vo.problemsubmit.SubmitSummaryVo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -19,5 +19,5 @@ public interface ProblemSubmitService extends IService<ProblemSubmit> {
 
     Page<ProblemSubmitVo> listProblemSubmitVoByPage(ProblemSubmitQueryReq problemSubmitQueryReq);
 
-    SubmitSummaryVo getSubmitSummary(String token);
+    SubmitSummaryVo getSubmitSummary();
 }

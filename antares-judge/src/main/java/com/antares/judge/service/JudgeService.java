@@ -1,7 +1,7 @@
 package com.antares.judge.service;
 
-import com.antares.common.model.entity.ProblemSubmit;
-import com.antares.common.model.vo.problemsubmit.ProblemSubmitVo;
+import com.antares.judge.model.entity.ProblemSubmit;
+import com.antares.judge.model.vo.problemsubmit.ProblemSubmitVo;
 
 /**
  * @author Antares
@@ -16,5 +16,5 @@ public interface JudgeService {
      * @param problemSubmit
      * @return
      */
-    ProblemSubmitVo doJudge(ProblemSubmit problemSubmit, String accessKey, String secretKey);
+    ProblemSubmitVo doJudge(ProblemSubmit problemSubmit, String secretId, String secretKey);
 }

@@ -10,22 +10,22 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.antares.common.constant.SqlConstant;
-import com.antares.common.mapper.ProblemMapper;
-import com.antares.common.mapper.ProblemSubmitMapper;
-import com.antares.common.model.dto.problem.ProblemAddReq;
-import com.antares.common.model.dto.problem.ProblemQueryReq;
-import com.antares.common.model.dto.problem.ProblemUpdateReq;
-import com.antares.common.model.entity.Problem;
-import com.antares.common.model.entity.ProblemSubmit;
-import com.antares.common.model.enums.HttpCodeEnum;
-import com.antares.common.model.enums.judge.ProblemStatusEnum;
-import com.antares.common.model.enums.judge.ProblemSubmitStatusEnum;
-import com.antares.common.model.vo.problem.ProblemVo;
-import com.antares.common.model.vo.problem.SafeProblemVo;
-import com.antares.common.utils.SqlUtils;
-import com.antares.common.utils.ThrowUtils;
-import com.antares.common.utils.TokenUtils;
+import com.antares.common.auth.utils.TokenUtils;
+import com.antares.common.core.enums.HttpCodeEnum;
+import com.antares.common.core.utils.ThrowUtils;
+import com.antares.common.mybatis.constant.SqlConstant;
+import com.antares.common.mybatis.utils.SqlUtils;
+import com.antares.judge.mapper.ProblemMapper;
+import com.antares.judge.mapper.ProblemSubmitMapper;
+import com.antares.judge.model.dto.problem.ProblemAddReq;
+import com.antares.judge.model.dto.problem.ProblemQueryReq;
+import com.antares.judge.model.dto.problem.ProblemUpdateReq;
+import com.antares.judge.model.entity.Problem;
+import com.antares.judge.model.entity.ProblemSubmit;
+import com.antares.judge.model.enums.ProblemStatusEnum;
+import com.antares.judge.model.enums.ProblemSubmitStatusEnum;
+import com.antares.judge.model.vo.problem.ProblemVo;
+import com.antares.judge.model.vo.problem.SafeProblemVo;
 import com.antares.judge.service.ProblemService;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -51,11 +51,11 @@ public class ProblemServiceImpl extends ServiceImpl<ProblemMapper, Problem>
 
     @Override
     @CacheEvict(cacheNames = "judge:problem", key = "'tags'")
-    public Long addProblem(ProblemAddReq problemAddRequest, String token) {
+    public Long addProblem(ProblemAddReq problemAddRequest) {
         Problem problem = new Problem();
         BeanUtil.copyProperties(problemAddRequest, problem);
         // 设置创建者
-        problem.setUserId(TokenUtils.getUidFromToken(token));
+        problem.setUserId(TokenUtils.getCurrentUid());
         // 设置其他信息
         problem.setTags(JSONUtil.toJsonStr(problemAddRequest.getTags()));
         problem.setJudgeCase(JSONUtil.toJsonStr(problemAddRequest.getJudgeCase()));
@@ -97,7 +97,7 @@ public class ProblemServiceImpl extends ServiceImpl<ProblemMapper, Problem>
     }
 
     @Override
-    public Page<SafeProblemVo> listSafeProblemVoByPage(ProblemQueryReq problemQueryRequest, String token) {
+    public Page<SafeProblemVo> listSafeProblemVoByPage(ProblemQueryReq problemQueryRequest) {
         long pageNum = problemQueryRequest.getCurrent();
         long pageSize = problemQueryRequest.getSize();
         // 限制爬虫
@@ -106,7 +106,7 @@ public class ProblemServiceImpl extends ServiceImpl<ProblemMapper, Problem>
         Wrapper<Problem> queryWrapper = getQueryWrapper(problemQueryRequest);
         Page<Problem> problemPage = page(new Page<>(pageNum, pageSize), queryWrapper);
 
-        Long uid = TokenUtils.getUidFromToken(token);
+        Long uid = TokenUtils.getCurrentUid();
         List<SafeProblemVo> records = problemPage.getRecords().stream()
                 .map(problem -> SafeProblemVo.objToVo(problem, uid, problemSubmitMapper))
                 .collect(Collectors.toList());

@@ -4,8 +4,8 @@ import javax.annotation.Resource;
 
 import org.springframework.stereotype.Component;
 
-import com.antares.common.exception.BusinessException;
-import com.antares.common.model.enums.HttpCodeEnum;
+import com.antares.common.core.enums.HttpCodeEnum;
+import com.antares.common.core.exception.BusinessException;
 import com.antares.judge.codesandbox.impl.RemoteCodeSandbox;
 import com.antares.judge.codesandbox.impl.ThirdPartyCodeSandbox;
 

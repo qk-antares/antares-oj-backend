@@ -13,6 +13,7 @@
         <module>antares-gateway</module>
         <module>antares-judge</module>
         <module>antares-code-sandbox-sdk</module>
+        <module>antares-api</module>
     </modules>
     <packaging>pom</packaging>
 

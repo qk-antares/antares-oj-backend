@@ -17,21 +17,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.antares.common.annotation.RoleCheck;
-import com.antares.common.annotation.TokenCheck;
-import com.antares.common.constant.UserConstant;
-import com.antares.common.mapper.ProblemMapper;
-import com.antares.common.mapper.ProblemSubmitMapper;
-import com.antares.common.model.dto.R;
-import com.antares.common.model.dto.problem.ProblemAddReq;
-import com.antares.common.model.dto.problem.ProblemQueryReq;
-import com.antares.common.model.dto.problem.ProblemUpdateReq;
-import com.antares.common.model.entity.Problem;
-import com.antares.common.model.enums.HttpCodeEnum;
-import com.antares.common.model.vo.problem.ProblemVo;
-import com.antares.common.model.vo.problem.SafeProblemVo;
-import com.antares.common.utils.ThrowUtils;
-import com.antares.common.utils.TokenUtils;
+import com.antares.common.auth.annotation.RoleCheck;
+import com.antares.common.auth.annotation.TokenCheck;
+import com.antares.common.auth.constant.UserConstant;
+import com.antares.common.auth.utils.TokenUtils;
+import com.antares.common.core.dto.R;
+import com.antares.common.core.enums.HttpCodeEnum;
+import com.antares.common.core.utils.ThrowUtils;
+import com.antares.judge.mapper.ProblemMapper;
+import com.antares.judge.mapper.ProblemSubmitMapper;
+import com.antares.judge.model.dto.problem.ProblemAddReq;
+import com.antares.judge.model.dto.problem.ProblemQueryReq;
+import com.antares.judge.model.dto.problem.ProblemUpdateReq;
+import com.antares.judge.model.entity.Problem;
+import com.antares.judge.model.vo.problem.ProblemVo;
+import com.antares.judge.model.vo.problem.SafeProblemVo;
 import com.antares.judge.service.ProblemService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
@@ -64,8 +64,7 @@ public class ProblemController {
     @TokenCheck
     @RoleCheck(mustRole = UserConstant.ADMIN_ROLE)
     public R<Long> addProblem(@RequestBody @NotNull @Valid ProblemAddReq problemAddReq) {
-        String token = TokenUtils.getToken();
-        Long id = problemService.addProblem(problemAddReq, token);
+        Long id = problemService.addProblem(problemAddReq);
         return R.ok(id);
     }
 
@@ -154,8 +153,7 @@ public class ProblemController {
     public R<SafeProblemVo> getSafeProblemVoById(@PathVariable("id") @Min(1) Long id) {
         Problem problem = problemService.getById(id);
         ThrowUtils.throwIf(problem == null, HttpCodeEnum.NOT_EXIST, "题目不存在");
-        String token = TokenUtils.getToken();
-        Long uid = TokenUtils.getUidFromToken(token);
+        Long uid = TokenUtils.getCurrentUid();
         SafeProblemVo vo = SafeProblemVo.objToVo(problem, uid, problemSubmitMapper);
         return R.ok(vo);
     }
@@ -168,8 +166,7 @@ public class ProblemController {
      */
     @PostMapping("/page/vo/safe")
     public R<Page<SafeProblemVo>> listSafeProblemVoByPage(@RequestBody ProblemQueryReq problemQueryReq) {
-        String token = TokenUtils.getToken();
-        Page<SafeProblemVo> page = problemService.listSafeProblemVoByPage(problemQueryReq, token);
+        Page<SafeProblemVo> page = problemService.listSafeProblemVoByPage(problemQueryReq);
         return R.ok(page);
     }
 

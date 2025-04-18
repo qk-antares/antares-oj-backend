@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.antares.codesandbox.sdk.model.dto.ExecuteCodeReq;
 import com.antares.codesandbox.sdk.model.dto.ExecuteCodeRes;
-import com.antares.common.annotation.TokenCheck;
-import com.antares.common.model.dto.R;
+import com.antares.common.auth.annotation.TokenCheck;
+import com.antares.common.core.dto.R;
 import com.antares.judge.service.ProblemRunService;
 
 import lombok.extern.slf4j.Slf4j;
