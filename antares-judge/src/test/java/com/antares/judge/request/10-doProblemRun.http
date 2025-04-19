@@ -5,5 +5,5 @@ Cookie: token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1aWQiOjE4NDg2NTMxNDk4MTI5N
 {
   "inputList": ["1 2", "2 3", " 4 5"],
   "code": "import java.util.Scanner;public class Main {public static void main(String args[]) throws Exception {try (Scanner cin = new Scanner(System.in)) {int a = cin.nextInt(), b = cin.nextInt();System.out.println(a + b);}}}",
-  "language": "java"
+  "language": "Java"
 }

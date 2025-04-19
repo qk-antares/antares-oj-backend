@@ -21,36 +21,14 @@ spring:
   config: # nacos作为配置中心的配置
     import:
       - "optional:nacos:${spring.application.name}-${spring.profiles.active}.yml"
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://172.17.0.1:3306/antares_oj?useSSL=false&serverTimezone=Asia/Shanghai
-    username: root
-    password: 123456
-  redis:
-    host: 172.17.0.1
-    port: 6379
-    password: 123456
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true # 当数据库字段使用_连接时这里配置成true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 配置日志
-  mapper-locations: classpath*:/mapper/**/*.xml # 配置xml文件位置，这里是和@mapperscan注解的作用是不同的，后者是指定dao的位置
-  global-config:
-    db-config:
-      id-type: auto
-      logic-delete-field: isDelete # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
-      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
-      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
 # logging:
 #   level:
 #     com.github.dockerjava: DEBUG  # 设置docker-java的日志级别
 antares:
-  user:
-    secret-key: 123456
   code-sandbox:
     timeout: 1000
     filename: Main
-    type: native
+    type: docker
     docker: # 当type设置为docker时需要进行配置
       jdk-image: openjdk:8-alpine
       host: tcp://172.17.0.1:2375

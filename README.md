@@ -46,11 +46,11 @@ GitHub仓库：
 ##### 1.2.2 后端技术栈
 
 - Spring Cloud Gateway：
-  1. 请求路由：根据请求的URL将请求转发到不同的服务 [[链接]](#####2.1.1 根据请求的URL将请求转发到不同的服务)
-  1. 统一处理CORS（跨域资源共享） [[链接]](#####2.1.3 统一处理CORS)
+  1. 请求路由：根据请求的URL将请求转发到不同的服务 [链接](#####2.1.1 根据请求的URL将请求转发到不同的服务)
+  1. 统一处理CORS（跨域资源共享） [链接](#####2.1.3 统一处理CORS)
 - Nacos：
-  1. 服务注册与发现
-  2. 动态配置管理
+  1. 服务注册与发现 [链接](#####2.2.1 服务注册与发现)
+  2. 动态配置管理 [链接](#####2.2.2 配置中心) 
 - Spring Boot：
   1. AOP切面编程搭配自定义异常来对异常做统一处理；
   2. 定时任务（计算文章得分并刷新热榜，每日刷新推荐用户，定时将文章浏览量从redis同步到数据库）
@@ -60,9 +60,6 @@ GitHub仓库：
 - Redis：
   1. 缓存，包括热点文章，文章点赞、收藏、浏览量，推荐用户，消息通知数等。其中文章点赞、收藏、浏览量、消息通知是永久存储的（结合OpenResty的lua脚本，把查询缓存的逻辑前置到nginx，进一步提高响应速度）
   2. 分布式锁（只用到了定时任务）
-- Elastic Search：
-  1. 搭配Jsoup爬虫，实现了聚合搜索功能
-  2. 搭配canal实现MySQL和ES的数据同步
 - Netty：
   1. 私聊（消息持久化、离线消息、消息通知，在线聊天过程中切换对话，接收不同对话的消息...）
 - RabbitMQ：
@@ -81,9 +78,15 @@ GitHub仓库：
 #### 1.3 项目结构
 
 ```bash
+├── antares-api    # 各个微服务提供的接口，供Dubbo远程调用
+│   └── antares-user-api  
 ├── antares-code-sandbox    # 代码沙箱服务 
 ├── antares-code-sandbox-sdk    # 调用代码沙箱的sdk
 ├── antares-common  # 各服务的公共依赖
+│   ├── antares-common-auth
+│   ├── antares-common-core
+│   ├── antares-common-mybatis
+│   └── antares-common-redis
 ├── antares-gateway # 网关服务
 ├── antares-judge   # 判题服务
 ├── antares-user    # 用户服务
@@ -317,13 +320,139 @@ RPC是通过网络调用远程系统（通常是另一台计算机）上的函�
 
 #### 2.2 Nacos
 
+##### 2.2.1 服务注册与发现
+
 服务提供者将服务注册到 Nacos，服务消费者通过 Nacos 获取服务实例列表，实现服务间调用。
 
+一方面来说，服务提供者可以是一个完整的微服务
 
+```yml
+spring:
+  cloud:
+    nacos:
+      server-addr: 172.17.0.3:8848 # Nacos地址
+      username: nacos
+      password: 123456
+      discovery:
+        namespace: 123456
+        group: rest
+```
 
+另一方面，也可以通过Dubbo提供某些服务接口的实现
 
+```yml
+dubbo:
+  application:
+    name: "${spring.application.name}-dubbo"
+    logger: slf4j
+    protocol: tri
+    qos-enable: false
+  registry:
+    address: nacos://172.17.0.3:8848?username=nacos&password=123456&namespace=123456&group=dubbo
+  	register-mode: instance
+  protocol:
+    name: tri
+    port: 8031
+```
 
+> 当不区分微服务注册的group和dubbo的group时，dubbo.application.name与spring.application.name必须相异，避免gateway在转发调用时出错
+>
+> qos-enable用于监控、管理和调试dubbo服务，默认开启且在22222端口，需要用telnet连接进行使用，不使用最好关掉
+>
+> register-mode有instance、service和all三种配置，默认是all。它决定了服务提供者的注册粒度，当设置为instance时，整个服务提供者注册一次；而设置为service时，每个service接口都会注册
 
+###### 依赖
+
+当nacos同时作为微服务以及dubbo的注册中心时，pom依赖如下（无需dubbo-nacos-spring-boot-starter）：
+
+```xml
+<!-- 服务注册与发现 -->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
+
+<!-- dubbo -->
+<dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-spring-boot-starter</artifactId>
+</dependency>
+<!-- <dependency>
+    <groupId>org.apache.dubbo</groupId>
+    <artifactId>dubbo-nacos-spring-boot-starter</artifactId>
+</dependency> -->
+```
+
+###### namespace与group
+
+实现**服务隔离与分类**的两个配置项。
+
+- `namespace` 用于 **区分不同的环境或不同的服务集群**，从而实现 **服务的隔离**。你可以使用 `namespace` 来为不同的开发环境、生产环境、测试环境等设置不同的命名空间，这样各个环境的服务可以相互隔离，不会相互影响。
+- `group` 用于对服务进行 **分组管理**，在同一个 `namespace` 下，服务可以被分配到不同的组中。`group` 的作用是帮助对服务进行更细粒度的分类和管理，常见的应用场景包括 **灰度发布** 或 **多版本管理**。
+
+不同`namespace`或`group`下的微服务之间是无法直接相互调用调用的。举个例子，Gateway项目位于groupA，则它无法将请求转发到位于groupB的service-a，即时服务的名字匹配上了。
+
+---
+
+##### 2.2.2 配置中心
+
+Nacos可以集中管理所有微服务的配置，配置可以在微服务启动时拉取，并在运行时动态刷新。
+
+###### 依赖与配置
+
+依赖
+
+```xml
+<!-- 配置中心 -->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+</dependency>
+```
+
+配置
+
+```yml
+spring:
+  cloud:
+    nacos:
+      server-addr: 172.17.0.3:8848 # Nacos地址
+      username: nacos
+      password: 123456
+      config:
+        namespace: 4a9711ba-ff63-4793-93e6-af052ba1bc78
+        group: rest
+  config: # nacos作为配置中心的配置
+    import:
+      - "optional:nacos:${spring.application.name}-${spring.profiles.active}.yml"
+```
+
+主要是这里的 `import` 配置，它指明了该微服务应该拉取哪些配置。
+
+nacos本身的配置必须放在本地，告诉微服务去哪里拉取，以及拉取哪些配置，其他的诸如**自定义的配置（如cookie的作用域以及过期时间）、MySQL、Redis**等都可以放在nacos的配置中心。这么做还有一个好处，就是我们不必重复写配置了，想象我们很多个微服务都要访问同一个数据库，或者至少它们使用相同的用户名密码，使用nacos配置中心后，可以将这些公共的配置写到一个common.yml中，然后各个微服务拉取即可。
+
+###### 配置动态刷新
+
+```java
+@Service
+@RefreshScope
+@Slf4j
+public class LoginServiceImpl extends ServiceImpl<UserMapper, User> implements LoginService {
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private MailUtil mailUtil;
+    @Resource
+    private Snowflake snowflake;
+    @Value("${antares.domain}")
+    private String domain;
+    @Value("${antares.user.secret-key}")
+    private String secretKey;
+    @Value("${antares.user.token-expire-hours}")
+    private Integer tokenExpireHours;
+```
+
+通过@RefreshScope注解可以实现配置项的动态刷新。
 
 ---
 

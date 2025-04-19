@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,8 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 public class LoginServiceImpl extends ServiceImpl<UserMapper, User> implements LoginService {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
-    @Resource
-    private RedisTemplate<String, Object> redisTemplate;
     @Resource
     private MailUtil mailUtil;
     @Resource
@@ -163,9 +160,6 @@ public class LoginServiceImpl extends ServiceImpl<UserMapper, User> implements L
 
         stringRedisTemplate.opsForValue()
                 .set(RedisConstant.USER_TOKEN_PREFIX + user.getUid(), token, tokenExpireHours, TimeUnit.HOURS);
-
-        redisTemplate.opsForValue()
-                .set("test", user, tokenExpireHours, TimeUnit.HOURS);
 
         // 设置cookie
         Cookie cookie = new Cookie(UserConstant.TOKEN, token);
