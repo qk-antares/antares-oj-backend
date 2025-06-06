@@ -12,6 +12,7 @@
     <artifactId>antares-common</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+    
     <modules>
         <module>antares-common-core</module>
         <module>antares-common-auth</module>

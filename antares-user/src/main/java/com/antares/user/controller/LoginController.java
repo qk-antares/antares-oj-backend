@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping
 public class LoginController {
-
     @Resource
     private LoginService loginService;
 

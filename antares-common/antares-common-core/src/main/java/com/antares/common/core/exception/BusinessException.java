@@ -9,8 +9,8 @@ import lombok.Getter;
  */
 @Getter
 public class BusinessException extends RuntimeException{
-    private final int code;
-    private final String msg;
+    private int code;
+    private String msg;
 
     public BusinessException(HttpCodeEnum httpCodeEnum) {
         super(httpCodeEnum.getMsg());

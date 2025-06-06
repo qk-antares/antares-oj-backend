@@ -45,31 +45,38 @@ GitHub仓库：
 
 ##### 1.2.2 后端技术栈
 
-- Spring Cloud Gateway：
-  1. 请求路由：根据请求的URL将请求转发到不同的服务 [链接](#####2.1.1 根据请求的URL将请求转发到不同的服务)
-  1. 统一处理CORS（跨域资源共享） [链接](#####2.1.3 统一处理CORS)
-- Nacos：
-  1. 服务注册与发现 [链接](#####2.2.1 服务注册与发现)
-  2. 动态配置管理 [链接](#####2.2.2 配置中心) 
-- Spring Boot：
-  1. AOP切面编程搭配自定义异常来对异常做统一处理；
-  2. 定时任务（计算文章得分并刷新热榜，每日刷新推荐用户，定时将文章浏览量从redis同步到数据库）
-  3. 使用validation相关注解对请求的参数进行校验
-- MySQL
-  1. 数据持久化，项目涉及到了极少量复杂查询
-- Redis：
-  1. 缓存，包括热点文章，文章点赞、收藏、浏览量，推荐用户，消息通知数等。其中文章点赞、收藏、浏览量、消息通知是永久存储的（结合OpenResty的lua脚本，把查询缓存的逻辑前置到nginx，进一步提高响应速度）
-  2. 分布式锁（只用到了定时任务）
-- Netty：
-  1. 私聊（消息持久化、离线消息、消息通知，在线聊天过程中切换对话，接收不同对话的消息...）
-- RabbitMQ：
-  1. 最简单的应用，异步处理点赞、收藏、关注、发邮件等消息，提高响应速度。只用到了直接交换机
+- [Spring Cloud Gateway](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.1_Gateway/Index.md)
+  1. [请求路由，根据请求的URL将请求转发到不同的服务](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.1_Gateway/2.1.1_Route.md)
+  1. [统一处理CORS（跨域资源共享）](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.1_Gateway/2.1.3_CORS.md)
+- [Nacos](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.2_Nacos.md)
+  1. 服务注册与发现
+  2. 动态配置管理
+- [Spring Boot](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.3_SpringBoot.md)
+  1. 自定义Bean的注入与使用（Spring IoC）
+  2. 泛型响应结构类+自定义异常类+`validation`+统一异常处理器类，实现对业务中异常的统一处理和响应（泛型、`Exception`、`hibernate-validator`、`@ExceptionHandler`）
+  3. AOP实现接口权限校验以及系统日志
+  4. `@Async`实现异步发送验证码，提升响应效率
+  5. CompletableFuture异步编程
+  6. 编写sdk供其他开发者调用代码沙箱
+- Redis:
+  1. 自定义序列化器（Serializer），并缓存热点数据（题目信息）。基于`spring-boot-starter-data-redis`实现旁路缓存模式
+  2. 缓存验证码，实现接口防刷
+  3. JWT实现单点登录，并在Redis中缓存用户状态
+  4. 基于位图实现每日一题签到功能
+- MySQL：
+  1. 优化索引设计，提高查询速度
+- Docker：
+  1. 通过docker-java远程连接docker，创建docker容器，编译执行代码，统计代码执行的时间和内存占用
+- Jenkins：
+  1. 自己部署服务器
+- 设计模式：
+  1. 模板方法模式
+  2. 策略模式
 - Nginx：
   1. 反向代理服务器
   2. lua脚本
 - 其他：
-  1. CompletableFuture异步编程
-  2. 余弦相似度算法
+  1. API签名认证，防止恶意调用代码沙箱
 
 
 
@@ -102,6 +109,8 @@ GitHub仓库：
 
 
 
+
+
 ----
 
 #### 1.5 下一步计划
@@ -120,339 +129,15 @@ GitHub仓库：
 
 ### 2. 后端技术点
 
-#### 2.1 Gateway
 
-[Spring Cloud Gateway 中文文档](https://springdoc.cn/spring-cloud-gateway/)
-
-> Spring Cloud Gateway提供了一个建立在Spring生态系统之上的**API网关**，旨在提供一种简单而有效的方式来路由到API，并为其提供跨领域的关注，如：安全、监控/指标和容错。
-
-##### 2.1.1 根据请求的URL将请求转发到不同的服务
-
-Spring Cloud Gateway通过 **路由规则匹配** 实现将不同的请求路由到不同的目标服务，路由规则通过 `application.yml` 配置文件定义：
-
-```yml
-spring:
-  cloud:
-    gateway:
-      routes:
-        # 前端项目都带/api前缀
-        - id: user_route
-          uri: lb://antares-user
-          predicates:
-            - Path=/api/user/**
-          filters:
-            - RewritePath=/api/(?<segment>.*), /$\{segment}
-
-        - id: sandbox_route
-          uri: lb://antares-code-sandbox
-          predicates:
-            - Path=/api/sandbox/**
-          filters:
-            - RewritePath=/api/(?<segment>.*),/$\{segment}
-```
-
-每一项路由规则由下面4个部分组成：**ID、目的地URI、谓词（Predicate）集合、过滤器（Filter）集合**
-
-- id：每个路由的唯一标识符
-- uri：表示目标服务的地址，`lb://` 前缀表示通过 **负载均衡** 来路由到一个注册在服务注册中心中的服务实例
-- **谓词（Predicate）**：在HTTP请求中的任何内容上进行匹配，比如Header或者查询参数
-- **过滤器（Filter）**：在发送下游请求之前或之后修改请求和响应
-
-<img src="https://springdoc.cn/spring-cloud-gateway/images/spring_cloud_gateway_diagram.png" alt="Spring Cloud Gateway Diagram" style="zoom: 80%;" />
 
 ---
 
-##### 2.1.2 负载均衡
 
-Spring Cloud Gateway 提供了 **负载均衡** 的支持，主要依赖于 **Spring Cloud LoadBalancer** 来实现。负载均衡允许将流量均匀分配到服务的多个实例上。
-
-> Spring Cloud Gateway依赖默认包含了LoadBalancer
->
-> ```xml
-> <dependency>
->   <groupId>org.springframework.cloud</groupId>
->   <artifactId>spring-cloud-starter-loadbalancer</artifactId>
->   <version>3.1.4</version>
->   <scope>compile</scope>
->   <optional>true</optional>
-> </dependency>
-> ```
->
-> 但这是一个optional的依赖，也就意味着只有在`application.yml`中有相关的配置时才会引入：
->
-> ```yml
-> spring:
->   cloud:
->     loadbalancer:
->       ribbon:
->         NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule  # 随机策略
-> ```
->
-> 否则还是要手动引入LoadBalancer
-
-###### 负载均衡的策略
-
-- **轮询（Round Robin）**：每次请求轮流分发到不同的服务实例。
-- **随机（RandomRule）**：随机选择一个服务实例。
-- **加权（WeightedResponseTimeRule）**：根据服务实例的权重分配请求。
-- **最少连接数（LeastConnectionsRule）**：转发到当前连接数最少的服务实例
-- **基于 IP 地址的负载均衡（ZoneAwareLoadBalancer）**：根据请求的源 IP 地址选择服务实例
-
-###### LoadBalancer缓存
-
-在我们运行Gateway项目的时候，往往会遇到下面的WARNING：
-
-```shell
-2025-04-11 19:33:37.914  WARN 407989 --- [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
-
-# 当前使用的是 默认缓存实现，该实现适用于开发和测试环境，但在生产环境中建议使用 Caffeine Cache，因为 Caffeine 提供了更高效的缓存功能，尤其是在高并发和大规模服务请求场景下。
-```
-
-Spring Cloud LoadBalancer 使用缓存来提高服务发现性能（缓存服务实例列表），避免频繁向注册中心查询服务实例，提升网关转发效率。
 
 ---
 
-##### 2.1.3 统一处理CORS
 
-```java
-@Configuration
-public class CorsConfig {
-    @Bean
-    public CorsWebFilter corsWebFilter(){
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-
-        //配置跨域
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-        config.addAllowedOriginPattern("*");
-        config.setAllowCredentials(true);
-
-        source.registerCorsConfiguration("/**", config);
-
-        return new CorsWebFilter(source);
-    }
-}
-```
-
-###### 跨域请求的流程/工作原理
-
-1. **浏览器发起请求**时，若发现请求跨域（Origin 不同），就会触发 **CORS 机制**
-
-   > **Origin（来源）** 是指浏览器用于标识请求的域的组成部分，它包括以下三个部分：
-   >
-   > 1. **协议（Scheme）**：如 `http://` 或 `https://`
-   > 2. **主机（Host）**：如 `www.example.com`
-   > 3. **端口（Port）**：如 `80`（HTTP默认端口）或 `443`（HTTPS默认端口）
-
-2. **浏览器自动发送一条预检请求（OPTIONS）**
-
-   - 检查服务端是否允许跨域访问
-   - 请求中会带上 `Origin`、`Access-Control-Request-Method` 等头
-
-3. **服务端必须响应这些特殊的 CORS 请求**
-
-   - 响应头中需要包含如：`Access-Control-Allow-Origin`、`Access-Control-Allow-Methods` 等
-
-4. 如果服务端响应通过，浏览器才会真正发起原本的请求（GET、POST 等）
-
-###### 为什么不允许跨域
-
-跨域限制（CORS）是**浏览器**的安全策略，目的是为了防止前端页面从 A 网站恶意获取 B 网站的数据（例如：A网站是一个恶意网站，该网站发送请求获取你在B网站登录的会话），也即**跨站请求伪造（CSRF）攻击**和**跨站脚本攻击（XSS）**
-
----
-
-##### 2.1.4 Spring Cloud Gateway和Nginx
-
-两者都可以做请求的转发、负载均衡，在定位上有什么区别呢？
-
-| 特性         | **Spring Cloud Gateway**                             | **Nginx**                              |
-| ------------ | ---------------------------------------------------- | -------------------------------------- |
-| **设计目标** | 微服务架构中的 API 网关                              | 反向代理、负载均衡、静态资源服务       |
-| **适用场景** | 动态路由、负载均衡、微服务间通信、API 管理           | 静态资源、负载均衡、反向代理、SSL 终止 |
-| **功能**     | 动态路由、负载均衡、身份验证、限流、熔断、日志记录等 | 高效的反向代理、静态资源处理、负载均衡 |
-| **性能**     | 适合微服务架构，性能较低                             | 高并发、静态资源处理能力强             |
-
-总的来说，Gateway的拓展功能更加丰富，如身份验证、限流、日志等；而Nginx也许能实现这些功能，但是需要通过lua脚本和OpenResty，相对来说更复杂。
-
-另一方面，Nginx的性能更高，尤其适合静态资源（Web前端），Gateway更多是作为后端项目的API网关。
-
----
-
-##### 2.1.5 内部接口
-
-在微服务的实践中，我们可能会遇到下面的安全需求——**有些接口只给内部服务调用，而不应该被外部用户访问**
-
-为达到这个目标，有几种实践方案：
-
-###### 添加认证机制
-
-这些接口虽然是暴漏的，在调用时必须带上特定标识，只允许认证通过的服务访问。这里特定的标识，是管理人员自己设置的一个Token，普通用户不知道。
-
-###### 网关控制访问路径
-
-由于外部用户**能且仅能通过网关来访问微服务**，我们可以直接在网关层面屏蔽掉这些接口。例如，暴漏给用户的接口是public前缀的，而内部接口是internal前缀的
-
-```yml
-spring:
-  cloud:
-    gateway:
-      routes:
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/user/public/**   # 只暴露 /public 接口
-```
-
-这样用户请求`/user/internal/**`时，由于它不符合任何的路由规则，该请求根本不会被转发到后面的微服务。内部的微服务位于同一局域网内，它们之间可以相互调用且不直接对外暴漏。
-
-###### RPC调用
-
-RPC是通过网络调用远程系统（通常是另一台计算机）上的函数或过程，就像调用本地函数一样。RPC不会向外暴漏HTTP接口，其具体的实现方式一般如下：
-
-- a-api抽象出接口
-- service-a实现a-api中的接口（@DubboService），并在启动后将自身信息注册到注册中心
-- service-b引用a-api中的接口（@DubboReference），虽然不去实现这些接口，但可以直接调用
-
-由于在实践中，微服务（service-a，service-b）不直接对外暴漏，且这些微服务位于同一局域网下，所以可以确保内部相互调用而用户无法访问
-
----
-
-#### 2.2 Nacos
-
-##### 2.2.1 服务注册与发现
-
-服务提供者将服务注册到 Nacos，服务消费者通过 Nacos 获取服务实例列表，实现服务间调用。
-
-一方面来说，服务提供者可以是一个完整的微服务
-
-```yml
-spring:
-  cloud:
-    nacos:
-      server-addr: 172.17.0.3:8848 # Nacos地址
-      username: nacos
-      password: 123456
-      discovery:
-        namespace: 123456
-        group: rest
-```
-
-另一方面，也可以通过Dubbo提供某些服务接口的实现
-
-```yml
-dubbo:
-  application:
-    name: "${spring.application.name}-dubbo"
-    logger: slf4j
-    protocol: tri
-    qos-enable: false
-  registry:
-    address: nacos://172.17.0.3:8848?username=nacos&password=123456&namespace=123456&group=dubbo
-  	register-mode: instance
-  protocol:
-    name: tri
-    port: 8031
-```
-
-> 当不区分微服务注册的group和dubbo的group时，dubbo.application.name与spring.application.name必须相异，避免gateway在转发调用时出错
->
-> qos-enable用于监控、管理和调试dubbo服务，默认开启且在22222端口，需要用telnet连接进行使用，不使用最好关掉
->
-> register-mode有instance、service和all三种配置，默认是all。它决定了服务提供者的注册粒度，当设置为instance时，整个服务提供者注册一次；而设置为service时，每个service接口都会注册
-
-###### 依赖
-
-当nacos同时作为微服务以及dubbo的注册中心时，pom依赖如下（无需dubbo-nacos-spring-boot-starter）：
-
-```xml
-<!-- 服务注册与发现 -->
-<dependency>
-    <groupId>com.alibaba.cloud</groupId>
-    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-</dependency>
-
-<!-- dubbo -->
-<dependency>
-    <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo-spring-boot-starter</artifactId>
-</dependency>
-<!-- <dependency>
-    <groupId>org.apache.dubbo</groupId>
-    <artifactId>dubbo-nacos-spring-boot-starter</artifactId>
-</dependency> -->
-```
-
-###### namespace与group
-
-实现**服务隔离与分类**的两个配置项。
-
-- `namespace` 用于 **区分不同的环境或不同的服务集群**，从而实现 **服务的隔离**。你可以使用 `namespace` 来为不同的开发环境、生产环境、测试环境等设置不同的命名空间，这样各个环境的服务可以相互隔离，不会相互影响。
-- `group` 用于对服务进行 **分组管理**，在同一个 `namespace` 下，服务可以被分配到不同的组中。`group` 的作用是帮助对服务进行更细粒度的分类和管理，常见的应用场景包括 **灰度发布** 或 **多版本管理**。
-
-不同`namespace`或`group`下的微服务之间是无法直接相互调用调用的。举个例子，Gateway项目位于groupA，则它无法将请求转发到位于groupB的service-a，即时服务的名字匹配上了。
-
----
-
-##### 2.2.2 配置中心
-
-Nacos可以集中管理所有微服务的配置，配置可以在微服务启动时拉取，并在运行时动态刷新。
-
-###### 依赖与配置
-
-依赖
-
-```xml
-<!-- 配置中心 -->
-<dependency>
-    <groupId>com.alibaba.cloud</groupId>
-    <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-</dependency>
-```
-
-配置
-
-```yml
-spring:
-  cloud:
-    nacos:
-      server-addr: 172.17.0.3:8848 # Nacos地址
-      username: nacos
-      password: 123456
-      config:
-        namespace: 4a9711ba-ff63-4793-93e6-af052ba1bc78
-        group: rest
-  config: # nacos作为配置中心的配置
-    import:
-      - "optional:nacos:${spring.application.name}-${spring.profiles.active}.yml"
-```
-
-主要是这里的 `import` 配置，它指明了该微服务应该拉取哪些配置。
-
-nacos本身的配置必须放在本地，告诉微服务去哪里拉取，以及拉取哪些配置，其他的诸如**自定义的配置（如cookie的作用域以及过期时间）、MySQL、Redis**等都可以放在nacos的配置中心。这么做还有一个好处，就是我们不必重复写配置了，想象我们很多个微服务都要访问同一个数据库，或者至少它们使用相同的用户名密码，使用nacos配置中心后，可以将这些公共的配置写到一个common.yml中，然后各个微服务拉取即可。
-
-###### 配置动态刷新
-
-```java
-@Service
-@RefreshScope
-@Slf4j
-public class LoginServiceImpl extends ServiceImpl<UserMapper, User> implements LoginService {
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
-    @Resource
-    private MailUtil mailUtil;
-    @Resource
-    private Snowflake snowflake;
-    @Value("${antares.domain}")
-    private String domain;
-    @Value("${antares.user.secret-key}")
-    private String secretKey;
-    @Value("${antares.user.token-expire-hours}")
-    private Integer tokenExpireHours;
-```
-
-通过@RefreshScope注解可以实现配置项的动态刷新。
 
 ---
 
