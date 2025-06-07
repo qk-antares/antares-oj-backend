@@ -4,7 +4,6 @@ import javax.annotation.Resource;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/run")
 @Slf4j
-@Validated
 public class ProblemRunController {
     @Resource
     private ProblemRunService problemRunService;

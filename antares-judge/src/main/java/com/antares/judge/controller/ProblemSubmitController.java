@@ -5,7 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/submit")
 @Slf4j
-@Validated
 public class ProblemSubmitController {
     @Resource
     private ProblemSubmitService problemSubmitService;

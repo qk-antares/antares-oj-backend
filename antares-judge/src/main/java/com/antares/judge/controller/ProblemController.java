@@ -7,7 +7,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,7 +44,6 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/problem")
 @Slf4j
-@Validated
 public class ProblemController {
     @Resource
     private ProblemService problemService;

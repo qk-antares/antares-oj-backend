@@ -35,25 +35,17 @@ GitHub仓库：
 
 ----
 
-#### 1.2 技术栈
-
-##### 1.2.1 前端技术栈
-
-
-
-
-
-##### 1.2.2 后端技术栈
+#### 1.2 后端技术栈
 
 - [Spring Cloud Gateway](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.1_Gateway/Index.md)
   1. [请求路由，根据请求的URL将请求转发到不同的服务](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.1_Gateway/2.1.1_Route.md)
-  1. [统一处理CORS（跨域资源共享）](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.1_Gateway/2.1.3_CORS.md)
-- [Nacos](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.2_Nacos.md)
-  1. 服务注册与发现
-  2. 动态配置管理
-- [Spring Boot](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.3_SpringBoot.md)
-  1. 自定义Bean的注入与使用（Spring IoC）
-  2. 泛型响应结构类+自定义异常类+`validation`+统一异常处理器类，实现对业务中异常的统一处理和响应（泛型、`Exception`、`hibernate-validator`、`@ExceptionHandler`）
+  2. [统一处理CORS（跨域资源共享）](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.1_Gateway/2.1.3_CORS.md)
+- [Nacos](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.2_Nacos/Index.md)
+  1. [服务注册与发现](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.2_Nacos/2.2.1_Registry.md)
+  2. [动态配置管理](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.2_Nacos/2.2.2_Config.md)
+- [Spring&Java](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.3_Spring&Java/Index.md)
+  1. [自定义Bean的注入与使用（Spring IoC）](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.3_Spring&Java/2.3.1_IoC.md)
+  2. [泛型响应结构类](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.3_Spring&Java/2.3.2_R.md)+[自定义异常类](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.3_Spring&Java/2.3.3_BusinessException.md)+[`hibernate-validator`参数校验](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.3_Spring&Java/2.3.4_Validator.md)+[`@ControllerAdvice`统一异常处理器类](https://github.com/qk-antares/antares-oj-backend/blob/master/doc/2.3_Spring&Java/2.3.5_ControllerAdvice.md)，实现对业务中异常的统一处理和响应
   3. AOP实现接口权限校验以及系统日志
   4. `@Async`实现异步发送验证码，提升响应效率
   5. CompletableFuture异步编程
@@ -127,19 +119,10 @@ GitHub仓库：
 
 ---
 
-### 2. 后端技术点
 
 
 
----
 
-
-
----
-
-
-
----
 
 #### 2.3 API签名认证
 
