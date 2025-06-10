@@ -1,0 +1,6 @@
+POST http://127.0.0.1:8011/user/test/user
+Content-Type: application/json
+
+{
+    "name": ""
+}

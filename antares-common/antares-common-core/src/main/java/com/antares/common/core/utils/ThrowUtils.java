@@ -24,19 +24,19 @@ public class ThrowUtils {
      * 条件成立则抛异常
      *
      * @param condition
-     * @param appHttpCodeEnum
+     * @param httpCodeEnum
      */
-    public static void throwIf(boolean condition, HttpCodeEnum appHttpCodeEnum) {
-        throwIf(condition, new BusinessException(appHttpCodeEnum));
+    public static void throwIf(boolean condition, HttpCodeEnum httpCodeEnum) {
+        throwIf(condition, new BusinessException(httpCodeEnum));
     }
 
     /**
      * 条件成立则抛异常
      * @param condition
-     * @param appHttpCodeEnum
+     * @param httpCodeEnum
      * @param msg
      */
-    public static void throwIf(boolean condition, HttpCodeEnum appHttpCodeEnum, String msg) {
-        throwIf(condition, new BusinessException(appHttpCodeEnum, msg));
+    public static void throwIf(boolean condition, HttpCodeEnum httpCodeEnum, String msg) {
+        throwIf(condition, new BusinessException(httpCodeEnum, msg));
     }
 }

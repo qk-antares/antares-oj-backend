@@ -55,7 +55,7 @@ public abstract class SandboxTemplate {
         } catch (BusinessException e) {
             return ExecuteCodeRes.builder()
                     .code(ExecuteCodeStatusEnum.COMPILE_FAILED.getValue())
-                    .msg(e.getMsg())
+                    .msg(e.getMessage())
                     .build();
         }
 
