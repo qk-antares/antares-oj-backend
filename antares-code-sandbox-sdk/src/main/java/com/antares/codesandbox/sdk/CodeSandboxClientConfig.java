@@ -6,6 +6,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import com.antares.codesandbox.sdk.client.CodeSandboxClient;
+import com.antares.codesandbox.sdk.constant.UrlConstant;
 
 import lombok.Data;
 
@@ -16,9 +17,10 @@ import lombok.Data;
 public class CodeSandboxClientConfig {
     private String accessKey;
     private String secretKey;
+    private String gatewayHost = UrlConstant.GATEWAY_HOST;
 
     @Bean
     public CodeSandboxClient codeSandboxClient() {
-        return new CodeSandboxClient(accessKey, secretKey);
+        return new CodeSandboxClient(accessKey, secretKey, gatewayHost);
     }
 }

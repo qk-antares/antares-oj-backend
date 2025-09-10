@@ -1,5 +1,6 @@
 package com.antares.codesandbox.sdk.client;
 
+import com.antares.codesandbox.sdk.constant.UrlConstant;
 import com.antares.codesandbox.sdk.model.dto.ExecuteCodeReq;
 import com.antares.codesandbox.sdk.model.dto.ExecuteCodeRes;
 import com.antares.codesandbox.sdk.utils.SignUtils;
@@ -19,13 +20,19 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 public class CodeSandboxClient {
-    public static final String GATEWAY_HOST = "http://127.0.0.1:8024";
     private String accessKey;
     private String secretKey;
+    private String gatewayHost;
+
+    public CodeSandboxClient(String accessKey, String secretKey) {
+        this.accessKey = accessKey;
+        this.secretKey = secretKey;
+        this.gatewayHost = UrlConstant.GATEWAY_HOST;
+    }
 
     public ExecuteCodeRes executeCode(ExecuteCodeReq executeCodeRequest) {
         String requestBodyJson = JSONUtil.toJsonStr(executeCodeRequest);
-        try (HttpResponse response = HttpRequest.post(GATEWAY_HOST + "/api/sandbox/execute")
+        try (HttpResponse response = HttpRequest.post(gatewayHost + "/api/sandbox/execute")
                 .header("Content-Type", "application/json")
                 .header("accessKey", accessKey)
                 .header("sign", SignUtils.genSign(requestBodyJson, secretKey))
