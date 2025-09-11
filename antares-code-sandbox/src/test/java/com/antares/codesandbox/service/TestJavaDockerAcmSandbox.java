@@ -28,17 +28,17 @@ import com.github.dockerjava.api.model.Volume;
 
 @SpringBootTest
 public class TestJavaDockerAcmSandbox {
-    @Value("${antares.code-sandbox.memory-limit:128}")
+    @Value("${antares.code-sandbox.docker.memory-limit:128}")
     private long memoryLimit;
-    @Value("${antares.code-sandbox.cpu-count:1}")
+    @Value("${antares.code-sandbox.docker.cpu-count:1}")
     private long cpuCount;
-    @Value("${antares.code-sandbox.save-path:/docker/code/java/antares-oj-backend/tmpCode}")
+    @Value("${antares.code-sandbox.docker.save-path:/docker/code/java/antares-oj-backend/tmpCode}")
     private String savePath;
-    @Value("${antares.code-sandbox.mem-script:/docker/code/java/antares-oj-backend/script/mem.sh}")
+    @Value("${antares.code-sandbox.docker.mem-script:/docker/code/java/antares-oj-backend/script/mem.sh}")
     private String memScript;
-    @Value("${antares.code-sandbox.jdk-image:openjdk:8-alpine}")
+    @Value("${antares.code-sandbox.docker.jdk-image:openjdk:8-alpine}")
     private String jdkImage;
-    @Value("${antares.code-sandbox.timeout:1000}")
+    @Value("${antares.code-sandbox.docker.timeout:1000}")
     private long timeout;
 
     @Resource

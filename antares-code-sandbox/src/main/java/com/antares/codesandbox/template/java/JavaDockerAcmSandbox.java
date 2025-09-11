@@ -43,15 +43,15 @@ import lombok.extern.slf4j.Slf4j;
 @RefreshScope
 @Slf4j
 public class JavaDockerAcmSandbox extends SandboxTemplate {
-    @Value("${antares.code-sandbox.memory-limit:128}")
+    @Value("${antares.code-sandbox.docker.memory-limit:128}")
     private long memoryLimit;
-    @Value("${antares.code-sandbox.cpu-count:1}")
+    @Value("${antares.code-sandbox.docker.cpu-count:1}")
     private long cpuCount;
-    @Value("${antares.code-sandbox.save-path:/docker/code/java/antares-oj-backend/tmpCode}")
+    @Value("${antares.code-sandbox.docker.save-path:/docker/code/java/antares-oj-backend/tmpCode}")
     private String savePath;
-    @Value("${antares.code-sandbox.mem-script:/docker/code/java/antares-oj-backend/script/mem.sh}")
+    @Value("${antares.code-sandbox.docker.mem-script:/docker/code/java/antares-oj-backend/script/mem.sh}")
     private String memScript;
-    @Value("${antares.code-sandbox.jdk-image:openjdk:8-alpine}")
+    @Value("${antares.code-sandbox.docker.jdk-image:openjdk:8-alpine}")
     private String jdkImage;
 
     @Resource
@@ -303,6 +303,7 @@ public class JavaDockerAcmSandbox extends SandboxTemplate {
         // 绑定代码目录，代码会通过容器外部的Java程序写入该目录，容器只负责编译和执行
         hostConfig.setBinds(new Bind(savePath + File.separator + codeId, new Volume("/app")),
                 new Bind(memScript, new Volume("/script/mem.sh")));
+        log.info("挂载：{}-{}; {}-{}", savePath + File.separator + codeId, "/app", memScript, "/script/mem.sh");
 
         CreateContainerResponse createContainerResponse = dockerClient
                 .createContainerCmd(this.jdkImage)

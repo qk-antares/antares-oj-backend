@@ -49,8 +49,8 @@ public abstract class SandboxTemplate {
         // 1. 把用户的代码保存为文件
         String dir = null;
         File codeFile = null;
+        dir = String.join(File.separator, System.getProperty("user.dir"), "tmpCode", UUID.randomUUID().toString());
         try {
-            dir = String.join(File.separator, System.getProperty("user.dir"), "tmpCode", UUID.randomUUID().toString());
             codeFile = saveFile(code, dir, ext);
         } catch (BusinessException e) {
             return ExecuteCodeRes.builder()
@@ -69,11 +69,11 @@ public abstract class SandboxTemplate {
                     .code(ExecuteCodeStatusEnum.RUN_FAILED.getValue())
                     .msg("服务器内部错误")
                     .build();
+        } finally {
+            // 3. 清理临时文件
+            clearFile(codeFile, dir);
         }
 
-
-        // 3. 清理临时文件
-        clearFile(codeFile, dir);
         return response;
     }
 
@@ -92,9 +92,9 @@ public abstract class SandboxTemplate {
         }
 
         String path = dir + File.separator + this.filename + ext;
-        log.info("代码保存目录：{}", dir);
+        log.info("代码保存路径：{}", path);
         File codFile = FileUtil.writeUtf8String(code, path);
-        
+
         try {
             // 设置权限为777
             Set<PosixFilePermission> permissions = new HashSet<>();

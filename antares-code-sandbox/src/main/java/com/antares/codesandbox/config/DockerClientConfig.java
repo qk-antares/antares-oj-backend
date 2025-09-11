@@ -19,13 +19,13 @@ import com.github.dockerjava.transport.DockerHttpClient;
 @ConditionalOnProperty(name = "antares.code-sandbox.type", havingValue = "docker")
 @RefreshScope
 public class DockerClientConfig {
-    @Value("${antares.code-sandbox.docker-host:tcp://172.17.0.1:2375}")
+    @Value("${antares.code-sandbox.docker.docker-host:tcp://172.17.0.1:2375}")
     private String dockerHost;
-    @Value("${antares.code-sandbox.max-connections:100}")
+    @Value("${antares.code-sandbox.docker.max-connections:100}")
     private int maxConnections;
-    @Value("${antares.code-sandbox.connect-timeout:30}")
+    @Value("${antares.code-sandbox.docker.connect-timeout:30}")
     private int connectTimeout;
-    @Value("${antares.code-sandbox.response-timeout:30}")
+    @Value("${antares.code-sandbox.docker.response-timeout:30}")
     private int responseTimeout;
 
     @Bean
