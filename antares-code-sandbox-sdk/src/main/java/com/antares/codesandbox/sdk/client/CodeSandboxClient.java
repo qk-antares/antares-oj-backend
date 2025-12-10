@@ -8,26 +8,27 @@ import com.antares.codesandbox.sdk.utils.SignUtils;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.json.JSONUtil;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 
 /**
  * @author Antares
  * @date 2023/9/3 8:16
  * @description 调用代码沙箱的客户端
  */
-@AllArgsConstructor
 @Slf4j
 public class CodeSandboxClient {
     private String accessKey;
     private String secretKey;
     private String gatewayHost;
 
-    public CodeSandboxClient(String accessKey, String secretKey) {
+    public CodeSandboxClient(String accessKey, String secretKey, String gatewayHost) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
-        this.gatewayHost = UrlConstant.GATEWAY_HOST;
+        if (gatewayHost != null) {
+            this.gatewayHost = gatewayHost;
+        } else {
+            this.gatewayHost = UrlConstant.GATEWAY_HOST;
+        }
     }
 
     public ExecuteCodeRes executeCode(ExecuteCodeReq executeCodeRequest) {

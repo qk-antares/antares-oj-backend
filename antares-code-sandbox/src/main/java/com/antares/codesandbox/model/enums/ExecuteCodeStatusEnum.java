@@ -7,6 +7,7 @@ import lombok.Getter;
  */
 @Getter
 public enum ExecuteCodeStatusEnum {
+    NOT_SUPPORTED_LANGUAGE("不支持的语言类型", 4),
     TIMEOUT("超出时间限制", 3),
     RUN_FAILED("执行出错", 2),
     COMPILE_FAILED("编译失败", 1),

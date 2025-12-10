@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.antares.codesandbox.model.dto.ExecuteCodeReq;
 import com.antares.codesandbox.model.dto.ExecuteCodeRes;
+import com.antares.codesandbox.model.enums.ExecuteCodeStatusEnum;
 import com.antares.codesandbox.model.enums.LanguageEnum;
 import com.antares.codesandbox.service.SandboxService;
 import com.antares.codesandbox.template.SandboxTemplate;
@@ -24,6 +25,13 @@ public class SandboxServiceImpl implements SandboxService {
         List<String> inputList = executeCodeReq.getInputList();
         String code = executeCodeReq.getCode();
         LanguageEnum language = LanguageEnum.getEnumByValue(executeCodeReq.getLanguage());
+
+        if(language == null) {
+            return ExecuteCodeRes.builder()
+                    .code(ExecuteCodeStatusEnum.NOT_SUPPORTED_LANGUAGE.getValue())
+                    .msg(ExecuteCodeStatusEnum.NOT_SUPPORTED_LANGUAGE.getMsg())
+                    .build();
+        }
 
         switch (language) {
             case LanguageEnum.JAVA:

@@ -11,7 +11,7 @@ import com.antares.codesandbox.sdk.constant.UrlConstant;
 import lombok.Data;
 
 @Configuration
-@ConfigurationProperties("antares.sandbox")
+@ConfigurationProperties("antares.code-sandbox")
 @Data
 @ComponentScan
 public class CodeSandboxClientConfig {

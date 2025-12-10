@@ -24,6 +24,7 @@
         <module>antares-judge</module>
         <module>antares-code-sandbox-sdk</module>
         <module>antares-api</module>
+        <module>antares-code-sandbox-sdk-test</module>
     </modules>
 
     <properties>
