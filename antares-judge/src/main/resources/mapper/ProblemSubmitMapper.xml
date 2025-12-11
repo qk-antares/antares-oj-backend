@@ -24,15 +24,20 @@
         is_delete
     </sql>
 
-    <select id="getPassCount" resultType="java.lang.Integer">
-        SELECT COUNT(DISTINCT problem_id)
-        FROM problem_submit
-        WHERE user_id = #{userId} AND status = 3
-        <if test="ids != null and ids.size() > 0">
-            AND problem_id IN
-            <foreach collection="ids" item="id" open="(" separator="," close=")">
-                #{id}
-            </foreach>
-        </if>
+    <!-- 这里必须使用LEFT JOIN查询 -->
+    <select id="getPassCount" resultType="com.antares.judge.model.vo.problemsubmit.PassCountVo">
+        SELECT COUNT(DISTINCT p.id) AS total_count, COUNT(
+                DISTINCT CASE
+                    WHEN ps.user_id = #{userId}
+                    AND ps.status = 3 THEN p.id
+                END
+            ) AS pass_count
+        FROM
+            problem p
+            LEFT JOIN problem_submit ps ON p.id = ps.problem_id
+            AND ps.user_id = #{userId}
+            AND ps.status = 3
+        WHERE
+            p.difficulty = #{difficulty}
     </select>
 </mapper>

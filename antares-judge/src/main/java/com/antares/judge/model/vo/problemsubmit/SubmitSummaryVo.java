@@ -4,8 +4,6 @@ import lombok.Data;
 
 @Data
 public class SubmitSummaryVo {
-    //题库总数
-    private Integer total;
     //简单
     private Integer easyPass;
     private Integer easyTotal;
@@ -22,3 +20,4 @@ public class SubmitSummaryVo {
     //通过总数
     private Integer passCount;
 }
+

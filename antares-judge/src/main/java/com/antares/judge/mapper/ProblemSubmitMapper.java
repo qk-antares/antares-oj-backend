@@ -1,10 +1,9 @@
 package com.antares.judge.mapper;
 
-import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 
 import com.antares.judge.model.entity.ProblemSubmit;
+import com.antares.judge.model.vo.problemsubmit.PassCountVo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -14,9 +13,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.antares.common.model.entity.ProblemSubmit
 */
 public interface ProblemSubmitMapper extends BaseMapper<ProblemSubmit> {
-    Integer getPassCount(@Param("userId") Long userId, @Param("ids") List<Long> ids);
+    PassCountVo getPassCount(@Param("userId") Long userId, @Param("difficulty") String difficulty);
 }
-
-
 
 

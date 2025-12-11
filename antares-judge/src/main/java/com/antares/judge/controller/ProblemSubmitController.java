@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.antares.common.auth.annotation.TokenCheck;
+import com.antares.common.auth.utils.TokenUtils;
 import com.antares.common.core.dto.R;
 import com.antares.judge.model.dto.problemsubmit.ProblemSubmitAddReq;
 import com.antares.judge.model.dto.problemsubmit.ProblemSubmitQueryReq;
@@ -87,7 +88,8 @@ public class ProblemSubmitController {
     @GetMapping("/summary")
     @TokenCheck
     public R<SubmitSummaryVo> getSubmitSummary() {
-        SubmitSummaryVo vo = problemSubmitService.getSubmitSummary();
+        Long uid = TokenUtils.getCurrentUid();
+        SubmitSummaryVo vo = problemSubmitService.getSubmitSummary(uid);
         return R.ok(vo);
     }
 

@@ -168,8 +168,14 @@ public class ProblemController {
         return R.ok(page);
     }
 
+    /**
+     * 获取上一题/下一题 id
+     * @param id
+     * @param direction
+     * @return
+     */
     @GetMapping("/{id}/{direction}")
-    public R<Long> getAdjacentProblemId(@PathVariable("id") @Min(1) Long id, @PathVariable("direction") String direction) {
-        return R.ok(problemMapper.getAdjacentProblemId(id, direction));
+    public R<Long> getPrevNextProblemId(@PathVariable("id") @Min(1) Long id, @PathVariable("direction") String direction) {
+        return R.ok(problemMapper.getPrevNextProblemId(id, direction));
     }
 }

@@ -12,9 +12,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.antares.common.model.entity.Problem
 */
 public interface ProblemMapper extends BaseMapper<Problem> {
-    Long getAdjacentProblemId(@Param("id") Long id, @Param("direction") String direction);
+    Long getPrevNextProblemId(@Param("id") Long id, @Param("direction") String direction);
 }
-
-
-
-

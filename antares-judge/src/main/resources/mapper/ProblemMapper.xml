@@ -32,7 +32,7 @@
         is_delete
     </sql>
 
-    <select id="getAdjacentProblemId" resultType="java.lang.Long">
+    <select id="getPrevNextProblemId" resultType="java.lang.Long">
         <choose>
             <!-- 查询下一个 ID -->
             <when test="direction == 'next'">

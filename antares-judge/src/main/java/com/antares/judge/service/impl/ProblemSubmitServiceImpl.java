@@ -22,6 +22,7 @@ import com.antares.judge.model.entity.ProblemSubmit;
 import com.antares.judge.model.enums.LanguageEnum;
 import com.antares.judge.model.enums.ProblemDifficultyEnum;
 import com.antares.judge.model.enums.ProblemSubmitStatusEnum;
+import com.antares.judge.model.vo.problemsubmit.PassCountVo;
 import com.antares.judge.model.vo.problemsubmit.ProblemSubmitVo;
 import com.antares.judge.model.vo.problemsubmit.SubmitSummaryVo;
 import com.antares.judge.service.JudgeService;
@@ -109,39 +110,19 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
     }
 
     @Override
-    public SubmitSummaryVo getSubmitSummary() {
+    public SubmitSummaryVo getSubmitSummary(Long uid) {
         SubmitSummaryVo summaryVo = new SubmitSummaryVo();
 
-        Long uid = TokenUtils.getCurrentUid();
-
-        // 获取简单、中等、困难题目ids
-        List<Long> easyIds = problemMapper.selectList(new LambdaQueryWrapper<Problem>()
-                .select(Problem::getId)
-                .eq(Problem::getDifficulty, ProblemDifficultyEnum.EASY.getValue()))
-                .stream().map(Problem::getId).collect(Collectors.toList());
-        List<Long> mediumIds = problemMapper.selectList(new LambdaQueryWrapper<Problem>()
-                .select(Problem::getId)
-                .eq(Problem::getDifficulty, ProblemDifficultyEnum.MEDIUM.getValue()))
-                .stream().map(Problem::getId).collect(Collectors.toList());
-        List<Long> hardIds = problemMapper.selectList(new LambdaQueryWrapper<Problem>()
-                .select(Problem::getId)
-                .eq(Problem::getDifficulty, ProblemDifficultyEnum.HARD.getValue()))
-                .stream().map(Problem::getId).collect(Collectors.toList());
-        int easyTotal = easyIds.size();
-        int mediumTotal = mediumIds.size();
-        int hardTotal = hardIds.size();
-        summaryVo.setEasyTotal(easyTotal);
-        summaryVo.setMediumTotal(mediumTotal);
-        summaryVo.setHardTotal(hardTotal);
-        summaryVo.setTotal(easyTotal + mediumTotal + hardTotal);
-
         // 获取用户通过的简单、中等、困难题目数
-        Integer easyPass = baseMapper.getPassCount(uid, easyIds);
-        Integer mediumPass = baseMapper.getPassCount(uid, mediumIds);
-        Integer hardPass = baseMapper.getPassCount(uid, hardIds);
-        summaryVo.setEasyPass(easyPass);
-        summaryVo.setMediumPass(mediumPass);
-        summaryVo.setHardPass(hardPass);
+        PassCountVo easyPass = baseMapper.getPassCount(uid, ProblemDifficultyEnum.EASY.getValue());
+        PassCountVo mediumPass = baseMapper.getPassCount(uid, ProblemDifficultyEnum.MEDIUM.getValue());
+        PassCountVo hardPass = baseMapper.getPassCount(uid, ProblemDifficultyEnum.HARD.getValue());
+        summaryVo.setEasyPass(easyPass.getPassCount());
+        summaryVo.setEasyTotal(easyPass.getTotalCount());
+        summaryVo.setMediumPass(mediumPass.getPassCount());
+        summaryVo.setMediumTotal(mediumPass.getTotalCount());
+        summaryVo.setHardPass(hardPass.getPassCount());
+        summaryVo.setHardTotal(hardPass.getTotalCount());
 
         // 获取用户提交总数
         Integer submitCount = baseMapper.selectCount(new LambdaQueryWrapper<ProblemSubmit>()
