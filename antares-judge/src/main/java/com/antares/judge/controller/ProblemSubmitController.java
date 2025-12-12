@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.antares.common.auth.annotation.TokenCheck;
 import com.antares.common.auth.utils.TokenUtils;
 import com.antares.common.core.dto.R;
+import com.antares.judge.annotation.RateLimit;
 import com.antares.judge.model.dto.problemsubmit.ProblemSubmitAddReq;
 import com.antares.judge.model.dto.problemsubmit.ProblemSubmitQueryReq;
 import com.antares.judge.model.entity.ProblemSubmit;
@@ -47,6 +48,7 @@ public class ProblemSubmitController {
      */
     @PostMapping
     @TokenCheck
+    @RateLimit(key = "rate_limit:problem_run_submit", message = "提交过于频繁，请稍后再试")
     public R<ProblemSubmitVo> doProblemSubmit(
             @RequestBody @NotNull @Valid ProblemSubmitAddReq problemSubmitAddRequest) {
         ProblemSubmitVo submitResult = problemSubmitService.doProblemSubmit(problemSubmitAddRequest);

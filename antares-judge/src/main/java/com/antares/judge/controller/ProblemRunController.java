@@ -13,6 +13,7 @@ import com.antares.codesandbox.sdk.model.dto.ExecuteCodeReq;
 import com.antares.codesandbox.sdk.model.dto.ExecuteCodeRes;
 import com.antares.common.auth.annotation.TokenCheck;
 import com.antares.common.core.dto.R;
+import com.antares.judge.annotation.RateLimit;
 import com.antares.judge.service.ProblemRunService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class ProblemRunController {
      */
     @PostMapping
     @TokenCheck
+    @RateLimit(key = "rate_limit:problem_run_submit", message = "提交过于频繁，请稍后再试")
     public R<ExecuteCodeRes> doProblemRun(@RequestBody @NotNull @Valid ExecuteCodeReq request) {
         ExecuteCodeRes response = problemRunService.doProblemRun(request);
         return R.ok(response);

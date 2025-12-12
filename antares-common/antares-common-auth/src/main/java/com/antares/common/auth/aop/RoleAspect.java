@@ -30,7 +30,7 @@ public class RoleAspect {
      * @param roleCheck
      * @return
      */
-    @Before("@annotation(com.antares.common.auth.annotation.RoleCheck)")
+    @Before("@annotation(roleCheck)")
     public void doBefore(RoleCheck roleCheck) throws Throwable {
         // 从Cookie中获取Token
         String token = TokenUtils.getToken();

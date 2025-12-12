@@ -16,7 +16,10 @@ public enum HttpCodeEnum {
     WRONG_CODE(10002, "验证码错误"),
     ACCOUNT_NOT_EXIST(10003, "账号不存在"),
     WRONG_PASSWORD(10004, "账号或密码错误"),
-    NOT_LOGIN(10005, "未登录");
+    NOT_LOGIN(10005, "未登录"),
+
+    // 判题
+    TOO_MANY_REQUESTS(20001, "操作过于频繁，请稍后再试");
 
     public int code;
     public String msg;

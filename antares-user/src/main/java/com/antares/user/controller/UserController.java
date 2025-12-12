@@ -15,6 +15,7 @@ import com.antares.common.core.dto.R;
 import com.antares.common.redis.constant.RedisConstant;
 import com.antares.user.mapper.UserMapper;
 import com.antares.user.model.entity.User;
+import com.antares.user.model.vo.AKSKVo;
 import com.antares.user.model.vo.UserVo;
 
 import cn.hutool.core.convert.NumberWithFormat;
@@ -62,6 +63,17 @@ public class UserController {
 
         User user = userMapper.selectById(uid);
         return R.ok(UserVo.userToVo(user));
+    }
+
+    @GetMapping(value = "/aksk")
+    @TokenCheck
+    public R<AKSKVo> getAKSK() {
+        Long uid = TokenUtils.getCurrentUid();
+        User user = userMapper.selectById(uid);
+        AKSKVo akskVo = new AKSKVo();
+        akskVo.setAccessKey(user.getSecretId());
+        akskVo.setSecretKey(user.getSecretKey());
+        return R.ok(akskVo);
     }
 
     @PostMapping(value = "/logout")
