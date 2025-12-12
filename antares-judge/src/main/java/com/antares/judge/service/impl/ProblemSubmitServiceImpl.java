@@ -1,18 +1,28 @@
 package com.antares.judge.service.impl;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import com.antares.common.auth.utils.TokenUtils;
 import com.antares.common.core.enums.HttpCodeEnum;
 import com.antares.common.core.exception.BusinessException;
 import com.antares.common.core.utils.ThrowUtils;
+import com.antares.common.redis.constant.RedisConstant;
 import com.antares.judge.mapper.ProblemMapper;
 import com.antares.judge.mapper.ProblemSubmitMapper;
 import com.antares.judge.model.dto.problemsubmit.ProblemSubmitAddReq;
@@ -51,6 +61,8 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
     private JudgeService judgeService;
     @Resource
     private Snowflake snowflake;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
     @DubboReference
     private UserInnerService userInnerService;
 
@@ -87,6 +99,12 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
         SecretDTO secretDTO = userInnerService.getSecretByUid(userId);
         ProblemSubmitVo submitResult = judgeService.doJudge(problemSubmit, secretDTO.getSecretId(),
                 secretDTO.getSecretKey());
+
+        // 执行签到
+        if (submitResult.getStatus().equals(ProblemSubmitStatusEnum.SUCCEED.getValue())) {
+            checkInAsync(userId, LocalDate.now());
+        }
+
         return submitResult;
     }
 
@@ -135,5 +153,54 @@ public class ProblemSubmitServiceImpl extends ServiceImpl<ProblemSubmitMapper, P
         summaryVo.setPassCount(passCount);
 
         return summaryVo;
+    }
+
+    @Override
+    public List<String> getCheckInDatesByMysql(Long uid, String date) {
+        YearMonth yearMonth = YearMonth.parse(date, DateTimeFormatter.ofPattern("yyyy-MM"));
+        LocalDate startDate = yearMonth.atDay(1); // 月初
+        LocalDate endDate = yearMonth.plusMonths(1).atDay(1); // 下月月初
+
+        // 如果需要字符串格式
+        String startDateStr = startDate.toString(); // "2025-12-01"
+        String endDateStr = endDate.toString(); // "2026-01-01"
+
+        List<String> checkInDates = baseMapper.getCheckInDates(uid, startDateStr, endDateStr);
+        return checkInDates;
+    }
+
+    @Override
+    public List<String> getCheckInDatesByRedis(Long uid, String date) {
+        YearMonth yearMonth = YearMonth.parse(date, DateTimeFormatter.ofPattern("yyyy-MM"));
+        int daysInMonth = yearMonth.lengthOfMonth();
+        String key = String.format(RedisConstant.CHECK_IN_FORMAT, uid, yearMonth.format(DateTimeFormatter.ofPattern("yyyyMM")));
+        byte[] rawKey = stringRedisTemplate.getStringSerializer().serialize(key);
+        byte[] bitmap = stringRedisTemplate.execute((RedisCallback<byte[]>)connection -> connection.get(rawKey));
+        if (bitmap == null) {
+            return new ArrayList<>();
+        }
+        List<String> checkInDates = new ArrayList<>();
+        for (int i = 0; i < daysInMonth; i++) {
+            int byteIndex = i / 8;
+            if (byteIndex >= bitmap.length) {
+                break;
+            }
+            int bitIndex = i % 8;
+            boolean signed = (bitmap[byteIndex] & (1 << (7 - bitIndex))) != 0;
+            if (signed) {
+                LocalDate signDate = yearMonth.atDay(i + 1);
+                checkInDates.add(signDate.toString());
+            }
+        }
+        return checkInDates;
+    }
+
+    @Override
+    @Async
+    public Future<Boolean> checkInAsync(Long uid, LocalDate date) {
+        String key = String.format("checkin:%d:%s", uid, date.format(DateTimeFormatter.ofPattern("yyyyMM")));
+        int offset = date.getDayOfMonth() - 1;
+        stringRedisTemplate.opsForValue().setBit(key, offset, true);
+        return new AsyncResult<>(true);
     }
 }

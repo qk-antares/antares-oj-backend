@@ -40,4 +40,13 @@
         WHERE
             p.difficulty = #{difficulty}
     </select>
+
+    <select id="getCheckInDates" resultType="java.lang.String">
+        SELECT DISTINCT(DATE(create_time))
+        FROM problem_submit
+        WHERE user_id = #{userId}
+          AND status = 3
+          AND DATE(create_time) &gt;= #{startDate}
+          AND DATE(create_time) &lt; #{endDate}
+    </select>
 </mapper>

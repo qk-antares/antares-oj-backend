@@ -1,5 +1,7 @@
 package com.antares.judge.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 import com.antares.judge.model.entity.ProblemSubmit;
@@ -14,6 +16,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface ProblemSubmitMapper extends BaseMapper<ProblemSubmit> {
     PassCountVo getPassCount(@Param("userId") Long userId, @Param("difficulty") String difficulty);
+
+    List<String> getCheckInDates(@Param("userId") Long userId,
+                                    @Param("startDate") String startDate,
+                                    @Param("endDate") String endDate);
 }
 
 

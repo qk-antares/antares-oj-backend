@@ -1,5 +1,9 @@
 package com.antares.judge.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.concurrent.Future;
+
 import com.antares.judge.model.dto.problemsubmit.ProblemSubmitAddReq;
 import com.antares.judge.model.dto.problemsubmit.ProblemSubmitQueryReq;
 import com.antares.judge.model.entity.ProblemSubmit;
@@ -20,4 +24,10 @@ public interface ProblemSubmitService extends IService<ProblemSubmit> {
     Page<ProblemSubmitVo> listProblemSubmitVoByPage(ProblemSubmitQueryReq problemSubmitQueryReq);
 
     SubmitSummaryVo getSubmitSummary(Long uid);
+
+    List<String> getCheckInDatesByMysql(Long uid, String date);
+
+    List<String> getCheckInDatesByRedis(Long uid, String date);
+
+    Future<Boolean> checkInAsync(Long uid, LocalDate date);
 }

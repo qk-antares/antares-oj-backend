@@ -1,5 +1,7 @@
 package com.antares.judge.controller;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -91,6 +93,20 @@ public class ProblemSubmitController {
         Long uid = TokenUtils.getCurrentUid();
         SubmitSummaryVo vo = problemSubmitService.getSubmitSummary(uid);
         return R.ok(vo);
+    }
+
+    /**
+     * 获取用户某月的打卡日期列表
+     * 
+     * @param date 格式为 "yyyy-MM"
+     * @return
+     */
+    @GetMapping("/checkIn/{date}")
+    @TokenCheck
+    public R<List<String>> getCheckInDates(@PathVariable("date") String date) {
+        Long uid = TokenUtils.getCurrentUid();
+        List<String> checkInDates = problemSubmitService.getCheckInDatesByRedis(uid, date);
+        return R.ok(checkInDates);
     }
 
 }
