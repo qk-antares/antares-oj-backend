@@ -9,13 +9,13 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'mvn clean compile -DskipTests'
+                sh 'mvn clean compile -DskipTests -pl \'!antares-code-sandbox-sdk-test\''
             }
         }
 
         stage('Package') {
             steps {
-                sh 'mvn package -DskipTests'
+                sh 'mvn package -DskipTests -pl \'!antares-code-sandbox-sdk-test\''
             }
         }
 
