@@ -1,2 +1,2 @@
 # spring boot starter
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.antares.codesandbox.sdk.CodeSandboxClientConfig
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.antares.codesandbox.sdk.CodeSandboxClientAutoConfiguration
